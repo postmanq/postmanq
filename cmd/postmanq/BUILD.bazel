@@ -1,0 +1,17 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["postmanq.go"],
+    importpath = "github.com/postmanq/postmanq/cmd/postmanq",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//cli:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "postmanq",
+    embed = [":go_default_library"],
+    visibility = ["//visibility:public"],
+)

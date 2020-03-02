@@ -1,0 +1,18 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "app.go",
+        "arguments.go",
+        "params.go",
+    ],
+    importpath = "github.com/postmanq/postmanq/cli",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_jessevdk_go_flags//:go_default_library",
+        "@org_uber_go_fx//:go_default_library",
+        "//module:go_default_library",
+        "//module/config/service:go_default_library",
+    ],
+)
