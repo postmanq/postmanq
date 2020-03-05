@@ -38,10 +38,7 @@ func (a *App) Run() {
 
 	var modules []interface{}
 	for _, file := range files {
-		if file.IsDir() {
-			continue
-		}
-		plug, err := plugin.Open(fmt.Sprintf("%s/%s", args.ModuleDir, file.Name()))
+		plug, err := plugin.Open(fmt.Sprintf("%s/%s/module.so", args.ModuleDir, file.Name()))
 		if err != nil {
 			log.Fatal(err)
 		}

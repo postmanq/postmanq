@@ -17,6 +17,10 @@ func NewConfigProviderByOptions(options ...config.YAMLOption) (ConfigProvider, e
 	return &configProvider{provider}, nil
 }
 
+func NewConfigProviderByFile(filename string) (ConfigProvider, error) {
+	return NewConfigProviderByOptions(config.File(filename))
+}
+
 type configProvider struct {
 	provider config.Provider
 }

@@ -1,7 +1,4 @@
 .idea
 out
 vendor
-bazel-bin
-bazel-out
-bazel-postmanq
-bazel-testlogs
+config.yml
