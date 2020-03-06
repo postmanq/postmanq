@@ -57,7 +57,7 @@ func (a *App) Run() {
 		}),
 		fx.Provide(modules...),
 		fx.Invoke(func(params Params) {
-
+			log.Println(params.Components)
 		}),
 	)
 
