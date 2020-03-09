@@ -3,6 +3,7 @@ package component
 import (
 	"context"
 	"fmt"
+	"github.com/postmanq/postmanq/module"
 	cs "github.com/postmanq/postmanq/module/config/service"
 	"github.com/postmanq/postmanq/module/queue/model"
 	qs "github.com/postmanq/postmanq/module/queue/service"
@@ -83,7 +84,7 @@ func (c *Receiver) OnInit() error {
 	return nil
 }
 
-func (c *Receiver) OnReceive() error {
+func (c *Receiver) OnReceive(deliveries chan module.Delivery, results chan module.Delivery) error {
 	_, err := c.subscriber.Subscribe(context.Background())
 	if err != nil {
 		return err

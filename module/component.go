@@ -5,5 +5,9 @@ type InitComponent interface {
 }
 
 type ReceiveComponent interface {
-	OnReceive() error
+	OnReceive(chan Delivery, chan Delivery) error
+}
+
+type SendComponent interface {
+	OnSend() error
 }
