@@ -31,13 +31,12 @@ func (s *ConfigProviderSuite) TestPopulate() {
 	s.Nil(err)
 
 	var a A
-	err = provider.Populate("a", &a)
-	s.Nil(err)
+	s.Nil(provider.Populate("a", &a))
 	s.Equal("bar", a.B)
 	s.Equal(true, a.C.D)
 	s.Equal(12, a.C.F)
 
 	var f int
-	err = provider.Populate("a.c.f", &f)
+	s.Nil(provider.Populate("a.c.f", &f))
 	s.Equal(12, f)
 }

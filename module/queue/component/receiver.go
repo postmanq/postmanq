@@ -82,3 +82,12 @@ func (c *Receiver) OnInit() error {
 
 	return nil
 }
+
+func (c *Receiver) OnReceive() error {
+	_, err := c.subscriber.Subscribe(context.Background())
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

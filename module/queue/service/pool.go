@@ -112,7 +112,7 @@ func (p *pool) CreatePublisher(ctx context.Context, exchange model.Exchange) (Pu
 		ctx:       chCtx,
 		errorChan: make(chan *amqp.Error),
 	}
-	if exchange.DisablePanicOnChannelError == false {
+	if !exchange.DisablePanicOnChannelError {
 		go p.listenErrors(chCtx, channel, pub.errorChan)
 	}
 	return pub, nil
@@ -168,7 +168,7 @@ func (p *pool) CreateSubscriber(ctx context.Context, q model.Queue) (Subscriber,
 		}
 	}
 
-	if s.queue.DisablePanicOnChannelError == false {
+	if !s.queue.DisablePanicOnChannelError {
 		go p.listenErrors(chCtx, s.channel, s.errors)
 	}
 

@@ -20,6 +20,9 @@ deps:
 test:
 	$(GOTEST) -v ./...
 
+lint:
+	golangci-lint run --skip-files=module.go
+
 clean:
 	rm -rf $(OUT_DIR)
 	rm -rf $(MOCK_DIR)
@@ -31,7 +34,7 @@ build-modules:
 	mkdir -p $(OUT_MODULE_DIR)
 	$(foreach MODULE, $(MODULES), $(GOBUILD) -buildmode=plugin -o $(OUT_MODULE_DIR)/$(shell basename $(MODULE))/module.so $(MODULE_DIR)/$(shell basename $(MODULE))/module.go;)
 
-build: clean create-mocks test build-modules build-postmanq
+build: clean create-mocks test lint build-modules build-postmanq
 
 run: build
 	$(OUT_DIR)/postmanq -c $(PROJECT_DIR)/config.yml
