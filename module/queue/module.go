@@ -4,27 +4,27 @@ import (
 	cs "github.com/postmanq/postmanq/module/config/service"
 	"github.com/postmanq/postmanq/module/queue/component"
 	qs "github.com/postmanq/postmanq/module/queue/service"
+	vs "github.com/postmanq/postmanq/module/validator/service"
 	"go.uber.org/fx"
 )
 
 type PqModuleIn struct {
 	fx.In
 	ConfigProvider cs.ConfigProvider
+	Validator      vs.Validator
 }
 
 type PqModuleOut struct {
 	fx.Out
-	Pool     qs.Pool
 	Receiver interface{} `group:"component"`
 }
 
 func PqModule(params PqModuleIn) PqModuleOut {
-	pool := qs.NewPool()
 	return PqModuleOut{
-		Pool: pool,
 		Receiver: component.NewReceiver(
 			params.ConfigProvider,
-			pool,
+			qs.NewPool(),
+			params.Validator,
 		),
 	}
 }
