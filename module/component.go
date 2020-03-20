@@ -9,5 +9,5 @@ type ReceiveComponent interface {
 }
 
 type SendComponent interface {
-	OnSend() error
+	OnSend(Delivery) error
 }

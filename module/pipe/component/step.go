@@ -6,8 +6,11 @@ type Step interface {
 	Run(int)
 }
 
-type SendingStep interface {
+type ResultStep interface {
+	Results() chan<- module.Delivery
+}
+
+type DeliveryStep interface {
 	Step
 	Deliveries() chan<- module.Delivery
-	Results() chan<- module.Delivery
 }

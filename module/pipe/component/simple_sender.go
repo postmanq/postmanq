@@ -1,40 +1,37 @@
 package component
 
 import (
-	"github.com/byorty/postmanq_sender/plugin"
-	"github.com/byorty/postmanq_sender/sending"
+	"github.com/postmanq/postmanq/module"
 )
 
 type SimpleSender struct {
-	sendings chan sending.Sending
-	sender   plugin.Sender
-	next     SendingStep
+	deliveries chan module.Delivery
+	sender     module.SendComponent
+	prev       ResultStep
+	next       DeliveryStep
 }
 
-func NewSimpleSender(sender plugin.Sender, next SendingStep) *SimpleSender {
+func NewSimpleSender(sender module.SendComponent, prev ResultStep, next DeliveryStep) *SimpleSender {
 	return &SimpleSender{
-		sendings: make(chan sending.Sending, 1024),
-		sender:   sender,
-		next:     next,
+		deliveries: make(chan module.Delivery, 1024),
+		sender:     sender,
+		prev:       prev,
+		next:       next,
 	}
 }
 
-func (c *SimpleSender) Run(numCPU int) {
-	for i := 0; i < numCPU; i++ {
+func (c *SimpleSender) Run(workerCount int) {
+	for i := 0; i < workerCount; i++ {
 		go func() {
-			for s := range c.sendings {
-				err := c.sender.OnSend(s)
+			for delivery := range c.deliveries {
+				err := c.sender.OnSend(delivery)
 
 				if err == nil {
-					c.next.Send(s)
+					c.next.Deliveries() <- delivery
 				} else {
-					s.Abort(err)
+					c.prev.Results() <- delivery
 				}
 			}
 		}()
 	}
-}
-
-func (c *SimpleSender) Send(s sending.Sending) {
-	c.sendings <- s
 }
