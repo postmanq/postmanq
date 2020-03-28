@@ -57,7 +57,7 @@ func (a *App) Run() {
 		}),
 		fx.Provide(modules...),
 		fx.Invoke(func(params Params) {
-			params.Pipe.Bootstrap()
+			params.Pipe.OnBootstrap()
 		}),
 	)
 

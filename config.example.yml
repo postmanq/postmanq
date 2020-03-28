@@ -17,4 +17,19 @@ queue:
     - 12h
     - 1d
 
-pipe:
+pipes:
+  - name: email
+    replicas: 10
+    stages:
+      - type: receive
+        components:
+          - queue/receiver
+      - type: middleware
+        component: component1
+      - type: parallel_middleware
+        components:
+          - component2
+          - component3
+          - component4
+      - type: complete
+        component: email/sender

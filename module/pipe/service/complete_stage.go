@@ -1,4 +1,4 @@
-package component
+package service
 
 import (
 	"github.com/postmanq/postmanq/module"

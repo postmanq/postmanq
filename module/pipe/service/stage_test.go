@@ -1,10 +1,10 @@
-package component_test
+package service_test
 
 import (
 	"fmt"
 	mm "github.com/postmanq/postmanq/mock/module"
 	"github.com/postmanq/postmanq/module"
-	"github.com/postmanq/postmanq/module/pipe/component"
+	"github.com/postmanq/postmanq/module/pipe/service"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/multierr"
@@ -17,10 +17,10 @@ func TestStageSuite(t *testing.T) {
 
 type StageSuite struct {
 	suite.Suite
-	receiveStage            *component.ReceiveStage
-	middlewareStage         *component.MiddlewareStage
-	parallelMiddlewareStage *component.ParallelMiddlewareStage
-	completeStage           *component.CompleteStage
+	receiveStage            *service.ReceiveStage
+	middlewareStage         *service.MiddlewareStage
+	parallelMiddlewareStage *service.ParallelMiddlewareStage
+	completeStage           *service.CompleteStage
 	receiver                *mm.ReceiveComponent
 	middleware              *mm.ProcessComponent
 	parallelMiddleware1     *mm.ProcessComponent
@@ -42,10 +42,10 @@ func (s *StageSuite) SetupTest() {
 		s.parallelMiddleware3,
 	}
 
-	s.receiveStage = component.NewReceiveStage(s.receiver)
-	s.completeStage = component.NewCompleteStage(s.sender, s.receiveStage)
-	s.middlewareStage = component.NewMiddlewareStage(s.middleware, s.receiveStage)
-	s.parallelMiddlewareStage = component.NewParallelMiddlewareStage(parallelMiddlewares, s.receiveStage)
+	s.receiveStage = service.NewReceiveStage(s.receiver)
+	s.completeStage = service.NewCompleteStage(s.sender, s.receiveStage)
+	s.middlewareStage = service.NewMiddlewareStage(s.middleware, s.receiveStage)
+	s.parallelMiddlewareStage = service.NewParallelMiddlewareStage(parallelMiddlewares, s.receiveStage)
 
 	s.receiveStage.Bind(s.middlewareStage)
 	s.middlewareStage.Bind(s.parallelMiddlewareStage)

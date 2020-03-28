@@ -1,15 +1,31 @@
 package component
 
+import (
+	cs "github.com/postmanq/postmanq/module/config/service"
+	"github.com/postmanq/postmanq/module/pipe/model"
+)
+
 type Pipe struct {
-	components []interface{}
+	configProvider cs.ConfigProvider
+	components     []interface{}
 }
 
-func NewPipe(components []interface{}) *Pipe {
+func NewPipe(
+	configProvider cs.ConfigProvider,
+	components []interface{},
+) *Pipe {
 	return &Pipe{
-		components: components,
+		configProvider: configProvider,
+		components:     components,
 	}
 }
 
-func (c *Pipe) Bootstrap() {
+func (c *Pipe) OnBootstrap() error {
+	var cfg model.Config
+	err := c.configProvider.Populate("pipes", &cfg)
+	if err != nil {
+		return err
+	}
 
+	return nil
 }
