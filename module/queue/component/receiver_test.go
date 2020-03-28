@@ -2,9 +2,9 @@ package component_test
 
 import (
 	"errors"
-	cs "github.com/postmanq/postmanq/mock/config/service"
-	qs "github.com/postmanq/postmanq/mock/queue/service"
-	vs "github.com/postmanq/postmanq/mock/validator/service"
+	cs "github.com/postmanq/postmanq/mock/module/config/service"
+	qs "github.com/postmanq/postmanq/mock/module/queue/service"
+	vs "github.com/postmanq/postmanq/mock/module/validator/service"
 	"github.com/postmanq/postmanq/module/queue/component"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"

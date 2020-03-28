@@ -11,3 +11,7 @@ type ReceiveComponent interface {
 type SendComponent interface {
 	OnSend(Delivery) error
 }
+
+type ProcessComponent interface {
+	OnProcess(Delivery) error
+}

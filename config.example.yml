@@ -4,7 +4,6 @@ modules:
 
 queue:
   url:
-  prefetchMessageCount: 10
   repeats:
     - 30s
     - 1m
@@ -17,3 +16,5 @@ queue:
     - 8h
     - 12h
     - 1d
+
+pipe:

@@ -5,6 +5,8 @@ MODULE_DIR=$(PROJECT_DIR)/module
 OUT_DIR=$(PROJECT_DIR)/out
 OUT_MODULE_DIR=$(OUT_DIR)/module
 MOCK_DIR=$(PROJECT_DIR)/mock
+MOCK_MODULE_DIR=$(PROJECT_DIR)/mock/module
+MOCK_COMPONENT_INTERFACES=InitComponent ReceiveComponent SendComponent ProcessComponent
 
 MODULES=$(shell ls -d $(MODULE_DIR)/*/)
 
@@ -40,4 +42,5 @@ run: build
 	$(OUT_DIR)/postmanq -c $(PROJECT_DIR)/config.yml
 
 create-mocks:
-	$(foreach MOCK_PACKAGE, $(MOCK_PACKAGES), $(MOCKERY) -dir=$(MODULE_DIR)/$(MOCK_PACKAGE) -output=$(MOCK_DIR)/$(MOCK_PACKAGE) -outpkg=$(shell basename $(MOCK_PACKAGE)) -all -case=snake;)
+	$(foreach MOCK_COMPONENT_INTERFACE, $(MOCK_COMPONENT_INTERFACES), $(MOCKERY) -dir=$(MODULE_DIR) -output=$(MOCK_MODULE_DIR) -outpkg=module -case=snake -name $(MOCK_COMPONENT_INTERFACE);)
+	$(foreach MOCK_PACKAGE, $(MOCK_PACKAGES), $(MOCKERY) -dir=$(MODULE_DIR)/$(MOCK_PACKAGE) -output=$(MOCK_MODULE_DIR)/$(MOCK_PACKAGE) -outpkg=$(shell basename $(MOCK_PACKAGE)) -all -case=snake;)

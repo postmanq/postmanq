@@ -10,5 +10,6 @@ require (
 	github.com/vektra/mockery v0.0.0-20181123154057-e78b021dcbb5 // indirect
 	go.uber.org/config v1.4.0
 	go.uber.org/fx v1.10.0
+	go.uber.org/multierr v1.5.0
 	go.uber.org/zap v1.14.0 // indirect
 )

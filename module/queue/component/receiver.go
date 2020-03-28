@@ -58,7 +58,7 @@ func (c *Receiver) OnInit() error {
 		Name:          prefix,
 		Exchange:      prefix,
 		Durable:       true,
-		PrefetchCount: cfg.PrefetchMessageCount,
+		PrefetchCount: 1,
 	})
 	if err != nil {
 		return err
@@ -84,10 +84,27 @@ func (c *Receiver) OnInit() error {
 	return nil
 }
 
-func (c *Receiver) OnReceive(deliveries chan module.Delivery, results chan module.Delivery) error {
-	_, err := c.subscriber.Subscribe(context.Background())
+func (c *Receiver) OnReceive(out chan module.Delivery, in chan module.Delivery) error {
+	deliveries, err := c.subscriber.Subscribe(context.Background())
 	if err != nil {
 		return err
+	}
+
+	for delivery := range deliveries {
+		out <- module.Delivery{}
+		result := <-in
+
+		if result.Err == nil {
+			err := delivery.Ack(false)
+			if err != nil {
+				return err
+			}
+		} else {
+			err := delivery.Reject(true)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
