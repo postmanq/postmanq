@@ -37,6 +37,10 @@ func NewReceiver(
 	}
 }
 
+func (c *Receiver) GetName() string {
+	return "queue/receiver"
+}
+
 func (c *Receiver) OnInit() error {
 	var cfg model.Config
 	err := c.configProvider.Populate("queue", &cfg)

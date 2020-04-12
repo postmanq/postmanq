@@ -7,5 +7,5 @@ import (
 
 type Params struct {
 	fx.In
-	Pipe *component.Pipe
+	Pipe *component.Runner
 }

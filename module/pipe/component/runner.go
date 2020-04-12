@@ -5,22 +5,22 @@ import (
 	"github.com/postmanq/postmanq/module/pipe/model"
 )
 
-type Pipe struct {
+type Runner struct {
 	configProvider cs.ConfigProvider
 	components     []interface{}
 }
 
-func NewPipe(
+func NewRunner(
 	configProvider cs.ConfigProvider,
 	components []interface{},
-) *Pipe {
-	return &Pipe{
+) *Runner {
+	return &Runner{
 		configProvider: configProvider,
 		components:     components,
 	}
 }
 
-func (c *Pipe) OnBootstrap() error {
+func (c *Runner) OnBootstrap() error {
 	var cfg model.Config
 	err := c.configProvider.Populate("pipes", &cfg)
 	if err != nil {

@@ -12,6 +12,20 @@ type ReceiveComponent struct {
 	mock.Mock
 }
 
+// GetName provides a mock function with given fields:
+func (_m *ReceiveComponent) GetName() string {
+	ret := _m.Called()
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func() string); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
 // OnReceive provides a mock function with given fields: _a0, _a1
 func (_m *ReceiveComponent) OnReceive(_a0 chan module.Delivery, _a1 chan module.Delivery) error {
 	ret := _m.Called(_a0, _a1)

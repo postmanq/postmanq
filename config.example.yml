@@ -17,7 +17,7 @@ queue:
     - 12h
     - 1d
 
-pipes:
+pipelines:
   - name: email
     replicas: 10
     stages:
