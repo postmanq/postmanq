@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"github.com/postmanq/postmanq/module/queue/model"
+	"github.com/postmanq/postmanq/module/rabbitmq/model"
 	"github.com/streadway/amqp"
 	"sync"
 )

@@ -1,11 +1,16 @@
 package service
 
 import (
+	"github.com/postmanq/postmanq/cli"
 	"go.uber.org/config"
 )
 
 type ConfigProvider interface {
 	Populate(string, interface{}) error
+}
+
+func NewConfigProviderByArgs(args cli.Arguments) (ConfigProvider, error) {
+	return NewConfigProviderByFile(args.ConfigFilename)
 }
 
 func NewConfigProviderByOptions(options ...config.YAMLOption) (ConfigProvider, error) {

@@ -16,7 +16,7 @@ import (
 type App struct {
 }
 
-func (a *App) Run() {
+func (a *App) Run(invoker interface{}) {
 	var args Arguments
 	_, err := flags.Parse(&args)
 	if err != nil {
@@ -36,29 +36,34 @@ func (a *App) Run() {
 		log.Fatal(err)
 	}
 
-	var modules []interface{}
+	var constructs []interface{}
 	for _, file := range files {
-		plug, err := plugin.Open(fmt.Sprintf("%s/%s/module.so", args.ModuleDir, file.Name()))
+		moduleName := fmt.Sprintf("%s/%s/module.so", args.ModuleDir, file.Name())
+		plug, err := plugin.Open(moduleName)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		symbol, err := plug.Lookup(module.Constructor)
+		symbol, err := plug.Lookup(module.ConstructName)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		modules = append(modules, symbol)
+		descriptorConstruct, ok := symbol.(*module.DescriptorConstruct)
+		if !ok {
+			log.Fatal(fmt.Errorf("can`t cast symbol=%T to module.DescriptorConstruct in mudule %s", symbol, moduleName))
+		}
+
+		descriptor := (*descriptorConstruct)()
+		constructs = append(constructs, descriptor.Constructs...)
 	}
 
 	app := fx.New(
 		fx.Provide(func() Arguments {
 			return args
 		}),
-		fx.Provide(modules...),
-		fx.Invoke(func(params Params) {
-			params.Pipe.OnBootstrap()
-		}),
+		fx.Provide(constructs...),
+		fx.Invoke(invoker),
 	)
 
 	if err := app.Start(context.Background()); err != nil {

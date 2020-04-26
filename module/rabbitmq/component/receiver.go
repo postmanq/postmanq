@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/postmanq/postmanq/module"
 	cs "github.com/postmanq/postmanq/module/config/service"
-	"github.com/postmanq/postmanq/module/queue/model"
-	qs "github.com/postmanq/postmanq/module/queue/service"
+	"github.com/postmanq/postmanq/module/rabbitmq/model"
+	qs "github.com/postmanq/postmanq/module/rabbitmq/service"
 	vs "github.com/postmanq/postmanq/module/validator/service"
 	"github.com/streadway/amqp"
 )
@@ -16,7 +16,12 @@ const (
 	exchangeKind = "direct"
 )
 
-type Receiver struct {
+type Receiver interface {
+	OnInit() error
+	OnReceive(out chan module.Delivery, in chan module.Delivery) error
+}
+
+type receiver struct {
 	configProvider   cs.ConfigProvider
 	pool             qs.Pool
 	validator        vs.Validator
@@ -28,20 +33,21 @@ func NewReceiver(
 	configProvider cs.ConfigProvider,
 	pool qs.Pool,
 	validator vs.Validator,
-) *Receiver {
-	return &Receiver{
-		configProvider:   configProvider,
-		pool:             pool,
-		validator:        validator,
-		repeatPublishers: make([]qs.Publisher, 0),
+) module.ComponentDescriptor {
+	return module.ComponentDescriptor{
+		Name: "rabbitmq/receiver",
+		Construct: func(module.ComponentConfig) interface{} {
+			return &receiver{
+				configProvider:   configProvider,
+				pool:             pool,
+				validator:        validator,
+				repeatPublishers: make([]qs.Publisher, 0),
+			}
+		},
 	}
 }
 
-func (c *Receiver) GetName() string {
-	return "queue/receiver"
-}
-
-func (c *Receiver) OnInit() error {
+func (c *receiver) OnInit() error {
 	var cfg model.Config
 	err := c.configProvider.Populate("queue", &cfg)
 	if err != nil {
@@ -88,7 +94,7 @@ func (c *Receiver) OnInit() error {
 	return nil
 }
 
-func (c *Receiver) OnReceive(out chan module.Delivery, in chan module.Delivery) error {
+func (c *receiver) OnReceive(out chan module.Delivery, in chan module.Delivery) error {
 	deliveries, err := c.subscriber.Subscribe(context.Background())
 	if err != nil {
 		return err

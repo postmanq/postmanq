@@ -1,5 +1,11 @@
 package module
 
 const (
-	Constructor = "PqModule"
+	ConstructName = "PqModule"
 )
+
+type DescriptorConstruct func() Descriptor
+
+type Descriptor struct {
+	Constructs []interface{}
+}

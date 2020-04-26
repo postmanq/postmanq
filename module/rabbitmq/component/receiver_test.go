@@ -3,9 +3,9 @@ package component_test
 import (
 	"errors"
 	cs "github.com/postmanq/postmanq/mock/module/config/service"
-	qs "github.com/postmanq/postmanq/mock/module/queue/service"
+	rs "github.com/postmanq/postmanq/mock/module/rabbitmq/service"
 	vs "github.com/postmanq/postmanq/mock/module/validator/service"
-	"github.com/postmanq/postmanq/module/queue/component"
+	"github.com/postmanq/postmanq/module/rabbitmq/component"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"testing"
@@ -23,20 +23,20 @@ func TestReceiverSuite(t *testing.T) {
 type ReceiverSuite struct {
 	suite.Suite
 	configProvider *cs.ConfigProvider
-	pool           *qs.Pool
+	pool           *rs.Pool
 	validator      *vs.Validator
-	receiver       *component.Receiver
+	receiver       component.Receiver
 }
 
 func (s *ReceiverSuite) SetupTest() {
 	s.configProvider = new(cs.ConfigProvider)
-	s.pool = new(qs.Pool)
+	s.pool = new(rs.Pool)
 	s.validator = new(vs.Validator)
 	s.receiver = component.NewReceiver(
 		s.configProvider,
 		s.pool,
 		s.validator,
-	)
+	).Construct(nil).(component.Receiver)
 }
 
 func (s *ReceiverSuite) TestFailureConfig() {

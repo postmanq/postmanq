@@ -66,7 +66,10 @@ func (s *StageSuite) TestReceiveStageSuccess() {
 
 func (s *StageSuite) TestMiddlewareStage() {
 	err := fmt.Errorf("middleware error")
-	go s.middlewareStage.Run()
+	go func() {
+		err := s.middlewareStage.Run()
+		s.Nil(err)
+	}()
 
 	s.middleware.On("OnProcess", mock.Anything).Return(err).Once()
 	s.middlewareStage.Deliveries() <- module.Delivery{}
@@ -85,7 +88,10 @@ func (s *StageSuite) TestMiddlewareStage() {
 func (s *StageSuite) TestParallelMiddlewareStage() {
 	err := fmt.Errorf("parallel middleware error")
 	combinedErr := multierr.Combine(err, err)
-	go s.parallelMiddlewareStage.Run()
+	go func() {
+		err := s.parallelMiddlewareStage.Run()
+		s.Nil(err)
+	}()
 
 	s.parallelMiddleware1.On("OnProcess", mock.Anything).Return(err).Once()
 	s.parallelMiddleware2.On("OnProcess", mock.Anything).Return(err).Once()
@@ -109,7 +115,10 @@ func (s *StageSuite) TestParallelMiddlewareStage() {
 
 func (s *StageSuite) TestCompleteStage() {
 	err := fmt.Errorf("complete error")
-	go s.completeStage.Run()
+	go func() {
+		err := s.completeStage.Run()
+		s.Nil(err)
+	}()
 
 	s.sender.On("OnSend", mock.Anything).Return(err).Once()
 	s.completeStage.Deliveries() <- module.Delivery{}

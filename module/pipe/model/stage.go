@@ -10,7 +10,8 @@ const (
 )
 
 type Stage struct {
-	Type       StageType `yaml:"type"`
-	Component  string    `yaml:"component"`
-	Components []string  `yaml:"components"`
+	Name       string      `yaml:"name"`
+	Type       StageType   `yaml:"type"`
+	Component  Component   `yaml:"component"`
+	Components []Component `yaml:"components"`
 }

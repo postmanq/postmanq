@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/postmanq/postmanq/module/queue/model"
+	"github.com/postmanq/postmanq/module/rabbitmq/model"
 	"github.com/streadway/amqp"
 	"math/rand"
 )

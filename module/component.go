@@ -1,25 +1,38 @@
 package module
 
-type Component interface {
-	GetName() string
+import "go.uber.org/fx"
+
+type ComponentConfig map[string]interface{}
+
+type ComponentConstruct func(ComponentConfig) interface{}
+
+type ComponentDescriptor struct {
+	fx.Out
+	Name      string
+	Construct ComponentConstruct `group:"component"`
 }
 
+type ComponentType int
+
+const (
+	ComponentTypeInit ComponentType = iota
+	ComponentTypeReceive
+	ComponentTypeSend
+	ComponentTypeProcess
+)
+
 type InitComponent interface {
-	Component
 	OnInit() error
 }
 
 type ReceiveComponent interface {
-	Component
 	OnReceive(chan Delivery, chan Delivery) error
 }
 
 type SendComponent interface {
-	Component
 	OnSend(Delivery) error
 }
 
 type ProcessComponent interface {
-	Component
 	OnProcess(Delivery) error
 }

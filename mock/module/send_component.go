@@ -12,20 +12,6 @@ type SendComponent struct {
 	mock.Mock
 }
 
-// GetName provides a mock function with given fields:
-func (_m *SendComponent) GetName() string {
-	ret := _m.Called()
-
-	var r0 string
-	if rf, ok := ret.Get(0).(func() string); ok {
-		r0 = rf()
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-
-	return r0
-}
-
 // OnSend provides a mock function with given fields: _a0
 func (_m *SendComponent) OnSend(_a0 module.Delivery) error {
 	ret := _m.Called(_a0)
