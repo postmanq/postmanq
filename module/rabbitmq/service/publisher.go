@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"github.com/postmanq/postmanq/module/rabbitmq/model"
+	"github.com/postmanq/postmanq/module/rabbitmq/entity"
 	"github.com/streadway/amqp"
 )
 
@@ -14,7 +14,7 @@ type Publisher interface {
 }
 
 type publisher struct {
-	exchange  model.Exchange
+	exchange  entity.Exchange
 	channel   *amqp.Channel
 	cancel    context.CancelFunc
 	ctx       context.Context

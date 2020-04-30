@@ -3,24 +3,25 @@ package component
 import (
 	"github.com/postmanq/postmanq/module"
 	cs "github.com/postmanq/postmanq/module/config/service"
-	"github.com/postmanq/postmanq/module/pipe/model"
+	"github.com/postmanq/postmanq/module/pipe/entity"
 	"github.com/postmanq/postmanq/module/pipe/service"
+	"github.com/postmanq/postmanq/module/pipe/service/factory"
 	"go.uber.org/fx"
 )
 
 type RunnerIn struct {
 	fx.In
 	ConfigProvider   cs.ConfigProvider
-	ComponentFactory service.ComponentFactory
-	PipelineFactory  service.PipelineFactory
+	ComponentFactory factory.ComponentFactory
+	PipelineFactory  factory.PipelineFactory
 	Components       []module.ComponentDescriptor `group:"component"`
 }
 
 type Runner struct {
 	configProvider   cs.ConfigProvider
 	components       []module.ComponentDescriptor
-	componentFactory service.ComponentFactory
-	pipelineFactory  service.PipelineFactory
+	componentFactory factory.ComponentFactory
+	pipelineFactory  factory.PipelineFactory
 }
 
 func NewRunner(in RunnerIn) *Runner {
@@ -31,7 +32,7 @@ func NewRunner(in RunnerIn) *Runner {
 }
 
 func (c *Runner) Run() error {
-	var pipelineConfigs []model.Pipeline
+	var pipelineConfigs []entity.Pipeline
 	err := c.configProvider.Populate("pipelines", &pipelineConfigs)
 	if err != nil {
 		return err

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/postmanq/postmanq/module"
 	cs "github.com/postmanq/postmanq/module/config/service"
-	"github.com/postmanq/postmanq/module/rabbitmq/model"
+	"github.com/postmanq/postmanq/module/rabbitmq/entity"
 	qs "github.com/postmanq/postmanq/module/rabbitmq/service"
 	vs "github.com/postmanq/postmanq/module/validator/service"
 	"github.com/streadway/amqp"
@@ -48,7 +48,7 @@ func NewReceiver(
 }
 
 func (c *receiver) OnInit() error {
-	var cfg model.Config
+	var cfg entity.Config
 	err := c.configProvider.Populate("queue", &cfg)
 	if err != nil {
 		return err
@@ -64,7 +64,7 @@ func (c *receiver) OnInit() error {
 		return err
 	}
 
-	c.subscriber, err = c.pool.CreateSubscriber(context.Background(), model.Queue{
+	c.subscriber, err = c.pool.CreateSubscriber(context.Background(), entity.Queue{
 		Name:          prefix,
 		Exchange:      prefix,
 		Durable:       true,
@@ -75,7 +75,7 @@ func (c *receiver) OnInit() error {
 	}
 
 	for _, repeat := range cfg.Repeats {
-		repeatPublisher, err := c.pool.CreatePublisher(context.Background(), model.Exchange{
+		repeatPublisher, err := c.pool.CreatePublisher(context.Background(), entity.Exchange{
 			Name:    fmt.Sprintf("%s.repeat.%s", prefix, repeat.String()),
 			Kind:    exchangeKind,
 			Durable: true,

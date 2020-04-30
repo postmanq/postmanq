@@ -1,4 +1,4 @@
-package model
+package entity
 
 import "github.com/postmanq/postmanq/module"
 

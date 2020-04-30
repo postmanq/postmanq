@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/postmanq/postmanq/module/rabbitmq/model"
+	"github.com/postmanq/postmanq/module/rabbitmq/entity"
 	"github.com/streadway/amqp"
 	"math/rand"
 )
@@ -18,7 +18,7 @@ type Subscriber interface {
 
 type subscriber struct {
 	channel *amqp.Channel
-	queue   model.Queue
+	queue   entity.Queue
 	ctx     context.Context
 	cancel  context.CancelFunc
 	errors  chan *amqp.Error

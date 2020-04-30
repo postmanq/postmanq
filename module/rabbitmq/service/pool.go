@@ -2,15 +2,15 @@ package service
 
 import (
 	"context"
-	"github.com/postmanq/postmanq/module/rabbitmq/model"
+	"github.com/postmanq/postmanq/module/rabbitmq/entity"
 	"github.com/streadway/amqp"
 	"sync"
 )
 
 type Pool interface {
 	Connect([]string) error
-	CreatePublisher(context.Context, model.Exchange) (Publisher, error)
-	CreateSubscriber(context.Context, model.Queue) (Subscriber, error)
+	CreatePublisher(context.Context, entity.Exchange) (Publisher, error)
+	CreateSubscriber(context.Context, entity.Queue) (Subscriber, error)
 }
 
 type pool struct {
@@ -93,7 +93,7 @@ func (p *pool) writeConn() *amqp.Connection {
 	return nil
 }
 
-func (p *pool) CreatePublisher(ctx context.Context, exchange model.Exchange) (Publisher, error) {
+func (p *pool) CreatePublisher(ctx context.Context, exchange entity.Exchange) (Publisher, error) {
 	channel, err := p.writeConn().Channel()
 	if err != nil {
 		return nil, err
@@ -118,7 +118,7 @@ func (p *pool) CreatePublisher(ctx context.Context, exchange model.Exchange) (Pu
 	return pub, nil
 }
 
-func (p *pool) CreateSubscriber(ctx context.Context, q model.Queue) (Subscriber, error) {
+func (p *pool) CreateSubscriber(ctx context.Context, q entity.Queue) (Subscriber, error) {
 	channel, err := p.readConn().Channel()
 	if err != nil {
 		return nil, err

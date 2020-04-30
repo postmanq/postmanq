@@ -1,10 +1,10 @@
-package service_test
+package stage_test
 
 import (
 	"fmt"
 	mm "github.com/postmanq/postmanq/mock/module"
 	"github.com/postmanq/postmanq/module"
-	"github.com/postmanq/postmanq/module/pipe/service"
+	"github.com/postmanq/postmanq/module/pipe/service/stage"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/multierr"
@@ -17,10 +17,10 @@ func TestStageSuite(t *testing.T) {
 
 type StageSuite struct {
 	suite.Suite
-	receiveStage            *service.ReceiveStage
-	middlewareStage         *service.MiddlewareStage
-	parallelMiddlewareStage *service.ParallelMiddlewareStage
-	completeStage           *service.CompleteStage
+	receiveStage            stage.ResultStage
+	middlewareStage         stage.DeliveryStage
+	parallelMiddlewareStage stage.DeliveryStage
+	completeStage           stage.DeliveryStage
 	receiver                *mm.ReceiveComponent
 	middleware              *mm.ProcessComponent
 	parallelMiddleware1     *mm.ProcessComponent
@@ -36,20 +36,36 @@ func (s *StageSuite) SetupTest() {
 	s.parallelMiddleware1 = new(mm.ProcessComponent)
 	s.parallelMiddleware2 = new(mm.ProcessComponent)
 	s.parallelMiddleware3 = new(mm.ProcessComponent)
-	parallelMiddlewares := []module.ProcessComponent{
+
+	receiveStage, err := stage.NewReceive().Constructor(nil, s.receiver)
+	s.Nil(err)
+	s.receiveStage = receiveStage.(stage.ResultStage)
+
+	completeStage, err := stage.NewComplete().Constructor(nil, s.sender)
+	s.Nil(err)
+	s.completeStage = completeStage.(stage.DeliveryStage)
+
+	middlewareStage, err := stage.NewMiddleware().Constructor(nil, s.middleware)
+	s.Nil(err)
+	s.middlewareStage = middlewareStage.(stage.DeliveryStage)
+
+	parallelMiddlewareStage, err := stage.NewParallelMiddleware().Constructor(nil, []interface{}{
 		s.parallelMiddleware1,
 		s.parallelMiddleware2,
 		s.parallelMiddleware3,
-	}
-
-	s.receiveStage = service.NewReceiveStage(s.receiver)
-	s.completeStage = service.NewCompleteStage(s.sender, s.receiveStage)
-	s.middlewareStage = service.NewMiddlewareStage(s.middleware, s.receiveStage)
-	s.parallelMiddlewareStage = service.NewParallelMiddlewareStage(parallelMiddlewares, s.receiveStage)
+	})
+	s.Nil(err)
+	s.parallelMiddlewareStage = parallelMiddlewareStage.(stage.DeliveryStage)
 
 	s.receiveStage.Bind(s.middlewareStage)
+
+	s.middlewareStage.Bind(s.receiveStage)
 	s.middlewareStage.Bind(s.parallelMiddlewareStage)
+
+	s.parallelMiddlewareStage.Bind(s.receiveStage)
 	s.parallelMiddlewareStage.Bind(s.completeStage)
+
+	s.completeStage.Bind(s.receiveStage)
 }
 
 func (s *StageSuite) TestReceiveStageFailure() {
