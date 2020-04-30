@@ -8,26 +8,28 @@ import (
 	"sync"
 )
 
-func NewParallelMiddleware() Descriptor {
-	return Descriptor{
-		Name: "parallel_middleware",
-		Type: MultiComponentType,
-		Constructor: func(cfg *entity.Stage, rawComponents interface{}) (Stage, error) {
-			components := rawComponents.([]interface{})
-			middlewares := make([]module.ProcessComponent, len(components))
-			for i, component := range components {
-				middleware, ok := component.(module.ProcessComponent)
-				if !ok {
-					return nil, errors.CantCastTypeToComponent(middleware)
+func NewParallelMiddleware() Out {
+	return Out{
+		Descriptor: Descriptor{
+			Name: "parallel_middleware",
+			Type: ArgTypeMulti,
+			Constructor: func(cfg *entity.Stage, rawComponents interface{}) (Stage, error) {
+				components := rawComponents.([]interface{})
+				middlewares := make([]module.ProcessComponent, len(components))
+				for i, component := range components {
+					middleware, ok := component.(module.ProcessComponent)
+					if !ok {
+						return nil, errors.CantCastTypeToComponent(middleware)
+					}
+
+					middlewares[i] = middleware
 				}
 
-				middlewares[i] = middleware
-			}
-
-			return &parallelMiddleware{
-				deliveries:  make(chan module.Delivery, chanSize),
-				middlewares: middlewares,
-			}, nil
+				return &parallelMiddleware{
+					deliveries:  make(chan module.Delivery, chanSize),
+					middlewares: middlewares,
+				}, nil
+			},
 		},
 	}
 }
@@ -39,17 +41,17 @@ type parallelMiddleware struct {
 	next        DeliveryStage
 }
 
-func (s *parallelMiddleware) Run() error {
+func (s *parallelMiddleware) Start() error {
 	defer func() {
 		close(s.deliveries)
 	}()
 
-	numSenders := len(s.middlewares)
+	middlewareLen := len(s.middlewares)
 	for delivery := range s.deliveries {
 		wg := new(sync.WaitGroup)
-		wg.Add(numSenders)
+		wg.Add(middlewareLen)
 
-		for y := 0; y < numSenders; y++ {
+		for y := 0; y < middlewareLen; y++ {
 			go func(middleware module.ProcessComponent) {
 				err := middleware.OnProcess(delivery)
 				if err != nil {
@@ -60,7 +62,6 @@ func (s *parallelMiddleware) Run() error {
 		}
 
 		wg.Wait()
-
 		if delivery.Err == nil {
 			s.next.Deliveries() <- delivery
 		} else {

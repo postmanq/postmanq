@@ -86,14 +86,14 @@ func (s *StageFactorySuite) SetupTest() {
 			Stages: []stage.Descriptor{
 				{
 					Name: "single",
-					Type: stage.SingleComponentType,
+					Type: stage.ArgTypeSingle,
 					Constructor: func(e *entity.Stage, c interface{}) (stage.Stage, error) {
 						return new(ms.Stage), nil
 					},
 				},
 				{
 					Name: "multi",
-					Type: stage.MultiComponentType,
+					Type: stage.ArgTypeMulti,
 					Constructor: func(e *entity.Stage, c interface{}) (stage.Stage, error) {
 						return new(ms.Stage), nil
 					},

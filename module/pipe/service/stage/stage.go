@@ -10,25 +10,31 @@ const (
 	chanSize = 1024
 )
 
-type Type int
+type ArgType int
 
 const (
-	UnknownComponentType Type = iota
-	SingleComponentType
-	MultiComponentType
+	ArgTypeUnknown ArgType = iota
+	ArgTypeSingle
+	ArgTypeMulti
 )
 
 type Constructor func(*entity.Stage, interface{}) (Stage, error)
 
-type Descriptor struct {
+type Out struct {
 	fx.Out
+	Descriptor `group:"stage"`
+}
+
+type Descriptor struct {
 	Name        string
-	Type        Type
+	Type        ArgType
 	Constructor Constructor
 }
 
 type Stage interface {
-	Run() error
+	//Init() error
+	Start() error
+	//Stop() error
 	Bind(Stage)
 }
 

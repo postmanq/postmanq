@@ -41,7 +41,7 @@ func (f *stageFactory) Create(e *entity.Stage) (stage.Stage, error) {
 	}
 
 	switch descriptor.Type {
-	case stage.SingleComponentType:
+	case stage.ArgTypeSingle:
 		if e.Component == nil {
 			return nil, errors.ComponentNotDefinedForStage(e)
 		}
@@ -52,7 +52,7 @@ func (f *stageFactory) Create(e *entity.Stage) (stage.Stage, error) {
 		}
 
 		return descriptor.Constructor(e, component)
-	case stage.MultiComponentType:
+	case stage.ArgTypeMulti:
 		componentsLen := len(e.Components)
 		if componentsLen == 0 {
 			return nil, errors.ComponentsNotDefinedForStage(e)

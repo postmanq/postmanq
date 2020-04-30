@@ -6,20 +6,22 @@ import (
 	"github.com/postmanq/postmanq/module/pipe/errors"
 )
 
-func NewComplete() Descriptor {
-	return Descriptor{
-		Name: "complete",
-		Type: SingleComponentType,
-		Constructor: func(cfg *entity.Stage, component interface{}) (Stage, error) {
-			sender, ok := component.(module.SendComponent)
-			if !ok {
-				return nil, errors.CantCastTypeToComponent(component)
-			}
+func NewComplete() Out {
+	return Out{
+		Descriptor: Descriptor{
+			Name: "complete",
+			Type: ArgTypeSingle,
+			Constructor: func(cfg *entity.Stage, component interface{}) (Stage, error) {
+				sender, ok := component.(module.SendComponent)
+				if !ok {
+					return nil, errors.CantCastTypeToComponent(component)
+				}
 
-			return &complete{
-				deliveries: make(chan module.Delivery, chanSize),
-				sender:     sender,
-			}, nil
+				return &complete{
+					deliveries: make(chan module.Delivery, chanSize),
+					sender:     sender,
+				}, nil
+			},
 		},
 	}
 }
@@ -30,17 +32,17 @@ type complete struct {
 	prev       ResultStage
 }
 
-func (s *complete) Run() error {
-	defer func() {
-		close(s.deliveries)
-	}()
-
+func (s *complete) Start() error {
 	for delivery := range s.deliveries {
 		delivery.Err = s.sender.OnSend(delivery)
 		s.prev.Results() <- delivery
 	}
 
 	return nil
+}
+
+func (s *complete) Stop() {
+	close(s.deliveries)
 }
 
 func (s *complete) Deliveries() chan module.Delivery {

@@ -17,8 +17,8 @@ func (_m *Stage) Bind(_a0 stage.Stage) {
 	_m.Called(_a0)
 }
 
-// Run provides a mock function with given fields:
-func (_m *Stage) Run() error {
+// Start provides a mock function with given fields:
+func (_m *Stage) Start() error {
 	ret := _m.Called()
 
 	var r0 error

@@ -6,21 +6,23 @@ import (
 	"github.com/postmanq/postmanq/module/pipe/errors"
 )
 
-func NewReceive() Descriptor {
-	return Descriptor{
-		Name: "receive",
-		Type: SingleComponentType,
-		Constructor: func(cfg *entity.Stage, component interface{}) (Stage, error) {
-			receiver, ok := component.(module.ReceiveComponent)
-			if !ok {
-				return nil, errors.CantCastTypeToComponent(component)
-			}
+func NewReceive() Out {
+	return Out{
+		Descriptor: Descriptor{
+			Name: "receive",
+			Type: ArgTypeSingle,
+			Constructor: func(cfg *entity.Stage, component interface{}) (Stage, error) {
+				receiver, ok := component.(module.ReceiveComponent)
+				if !ok {
+					return nil, errors.CantCastTypeToComponent(component)
+				}
 
-			return &receive{
-				receiver:   receiver,
-				deliveries: make(chan module.Delivery, chanSize),
-				results:    make(chan module.Delivery, chanSize),
-			}, nil
+				return &receive{
+					receiver:   receiver,
+					deliveries: make(chan module.Delivery, chanSize),
+					results:    make(chan module.Delivery, chanSize),
+				}, nil
+			},
 		},
 	}
 }
@@ -32,7 +34,7 @@ type receive struct {
 	results    chan module.Delivery
 }
 
-func (s *receive) Run() error {
+func (s *receive) Start() error {
 	defer func() {
 		close(s.deliveries)
 		close(s.results)

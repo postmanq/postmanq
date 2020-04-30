@@ -6,20 +6,22 @@ import (
 	"github.com/postmanq/postmanq/module/pipe/errors"
 )
 
-func NewMiddleware() Descriptor {
-	return Descriptor{
-		Name: "middleware",
-		Type: SingleComponentType,
-		Constructor: func(cfg *entity.Stage, component interface{}) (Stage, error) {
-			m, ok := component.(module.ProcessComponent)
-			if !ok {
-				return nil, errors.CantCastTypeToComponent(component)
-			}
+func NewMiddleware() Out {
+	return Out{
+		Descriptor: Descriptor{
+			Name: "middleware",
+			Type: ArgTypeSingle,
+			Constructor: func(cfg *entity.Stage, component interface{}) (Stage, error) {
+				m, ok := component.(module.ProcessComponent)
+				if !ok {
+					return nil, errors.CantCastTypeToComponent(component)
+				}
 
-			return &middleware{
-				deliveries: make(chan module.Delivery, chanSize),
-				middleware: m,
-			}, nil
+				return &middleware{
+					deliveries: make(chan module.Delivery, chanSize),
+					middleware: m,
+				}, nil
+			},
 		},
 	}
 }
@@ -31,7 +33,7 @@ type middleware struct {
 	next       DeliveryStage
 }
 
-func (s *middleware) Run() error {
+func (s *middleware) Start() error {
 	defer func() {
 		close(s.deliveries)
 	}()

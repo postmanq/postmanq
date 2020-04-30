@@ -70,20 +70,20 @@ func (s *StageSuite) SetupTest() {
 
 func (s *StageSuite) TestReceiveStageFailure() {
 	s.receiver.On("OnReceive", mock.Anything, mock.Anything).Return(fmt.Errorf("receiver error")).Once()
-	s.NotNil(s.receiveStage.Run())
+	s.NotNil(s.receiveStage.Start())
 	s.receiver.AssertNumberOfCalls(s.T(), "OnReceive", 1)
 }
 
 func (s *StageSuite) TestReceiveStageSuccess() {
 	s.receiver.On("OnReceive", mock.Anything, mock.Anything).Return(nil).Once()
-	s.Nil(s.receiveStage.Run())
+	s.Nil(s.receiveStage.Start())
 	s.receiver.AssertNumberOfCalls(s.T(), "OnReceive", 1)
 }
 
 func (s *StageSuite) TestMiddlewareStage() {
 	err := fmt.Errorf("middleware error")
 	go func() {
-		err := s.middlewareStage.Run()
+		err := s.middlewareStage.Start()
 		s.Nil(err)
 	}()
 
@@ -105,7 +105,7 @@ func (s *StageSuite) TestParallelMiddlewareStage() {
 	err := fmt.Errorf("parallel middleware error")
 	combinedErr := multierr.Combine(err, err)
 	go func() {
-		err := s.parallelMiddlewareStage.Run()
+		err := s.parallelMiddlewareStage.Start()
 		s.Nil(err)
 	}()
 
@@ -132,7 +132,7 @@ func (s *StageSuite) TestParallelMiddlewareStage() {
 func (s *StageSuite) TestCompleteStage() {
 	err := fmt.Errorf("complete error")
 	go func() {
-		err := s.completeStage.Run()
+		err := s.completeStage.Start()
 		s.Nil(err)
 	}()
 

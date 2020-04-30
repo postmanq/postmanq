@@ -33,16 +33,18 @@ func NewReceiver(
 	configProvider cs.ConfigProvider,
 	pool qs.Pool,
 	validator vs.Validator,
-) module.ComponentDescriptor {
-	return module.ComponentDescriptor{
-		Name: "rabbitmq/receiver",
-		Construct: func(module.ComponentConfig) interface{} {
-			return &receiver{
-				configProvider:   configProvider,
-				pool:             pool,
-				validator:        validator,
-				repeatPublishers: make([]qs.Publisher, 0),
-			}
+) module.ComponentOut {
+	return module.ComponentOut{
+		Descriptor: module.ComponentDescriptor{
+			Name: "rabbitmq/receiver",
+			Construct: func(module.ComponentConfig) interface{} {
+				return &receiver{
+					configProvider:   configProvider,
+					pool:             pool,
+					validator:        validator,
+					repeatPublishers: make([]qs.Publisher, 0),
+				}
+			},
 		},
 	}
 }

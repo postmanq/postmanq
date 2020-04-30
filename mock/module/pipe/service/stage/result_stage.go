@@ -35,8 +35,8 @@ func (_m *ResultStage) Results() chan module.Delivery {
 	return r0
 }
 
-// Run provides a mock function with given fields:
-func (_m *ResultStage) Run() error {
+// Start provides a mock function with given fields:
+func (_m *ResultStage) Start() error {
 	ret := _m.Called()
 
 	var r0 error

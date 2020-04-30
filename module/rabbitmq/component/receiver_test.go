@@ -36,7 +36,7 @@ func (s *ReceiverSuite) SetupTest() {
 		s.configProvider,
 		s.pool,
 		s.validator,
-	).Construct(nil).(component.Receiver)
+	).Descriptor.Construct(nil).(component.Receiver)
 }
 
 func (s *ReceiverSuite) TestFailureConfig() {

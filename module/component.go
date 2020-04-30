@@ -6,10 +6,14 @@ type ComponentConfig map[string]interface{}
 
 type ComponentConstruct func(ComponentConfig) interface{}
 
-type ComponentDescriptor struct {
+type ComponentOut struct {
 	fx.Out
+	Descriptor ComponentDescriptor `group:"component"`
+}
+
+type ComponentDescriptor struct {
 	Name      string
-	Construct ComponentConstruct `group:"component"`
+	Construct ComponentConstruct
 }
 
 type ComponentType int
