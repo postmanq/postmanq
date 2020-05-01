@@ -54,7 +54,9 @@ type PipelineFactory interface {
 func NewPipelineFactory(
 	stageFactory factory.StageFactory,
 ) PipelineFactory {
-	return &pipelineFactory{}
+	return &pipelineFactory{
+		stageFactory: stageFactory,
+	}
 }
 
 type pipelineFactory struct {

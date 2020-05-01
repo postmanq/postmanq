@@ -11,7 +11,7 @@ type ComponentFactory interface {
 	Create(*entity.Component) (interface{}, error)
 }
 
-func NewComponentFactory() ComponentFactory {
+func NewComponent() ComponentFactory {
 	return &componentFactory{
 		descriptors: make(map[string]module.ComponentDescriptor),
 	}

@@ -17,7 +17,7 @@ type StageFactoryIn struct {
 	Stages           []stage.Descriptor `group:"stage"`
 }
 
-func NewStageFactory(in StageFactoryIn) StageFactory {
+func NewStage(in StageFactoryIn) StageFactory {
 	descriptors := make(map[string]stage.Descriptor)
 	for _, descriptor := range in.Stages {
 		descriptors[descriptor.Name] = descriptor

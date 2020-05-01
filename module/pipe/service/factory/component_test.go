@@ -21,7 +21,7 @@ type ComponentFactorySuite struct {
 }
 
 func (s *ComponentFactorySuite) SetupTest() {
-	s.factory = factory.NewComponentFactory()
+	s.factory = factory.NewComponent()
 	s.validDescriptor = module.ComponentDescriptor{
 		Name: "component1",
 		Construct: func(configs module.ComponentConfig) interface{} {

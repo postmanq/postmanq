@@ -80,7 +80,7 @@ type StageFactorySuite struct {
 
 func (s *StageFactorySuite) SetupTest() {
 	s.componentFactory = new(mf.ComponentFactory)
-	s.stageFactory = factory.NewStageFactory(
+	s.stageFactory = factory.NewStage(
 		factory.StageFactoryIn{
 			ComponentFactory: s.componentFactory,
 			Stages: []stage.Descriptor{

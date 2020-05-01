@@ -18,7 +18,7 @@ const (
 
 type Receiver interface {
 	OnInit() error
-	OnReceive(out chan module.Delivery, in chan module.Delivery) error
+	OnReceive(out chan module.Delivery) error
 }
 
 type receiver struct {
