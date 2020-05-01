@@ -18,8 +18,7 @@ func NewComplete() Out {
 				}
 
 				return &complete{
-					deliveries: make(chan module.Delivery, chanSize),
-					sender:     sender,
+					sender: sender,
 				}, nil
 			},
 		},
@@ -27,28 +26,33 @@ func NewComplete() Out {
 }
 
 type complete struct {
-	deliveries chan module.Delivery
-	sender     module.SendComponent
-	prev       ResultStage
+	sender module.SendComponent
 }
 
-func (s *complete) Start() error {
-	for delivery := range s.deliveries {
-		delivery.Err = s.sender.OnSend(delivery)
-		s.prev.Results() <- delivery
+func (s *complete) Init() error {
+	cmp, ok := s.sender.(module.InitComponent)
+	if ok {
+		return cmp.OnInit()
 	}
 
 	return nil
 }
 
-func (s *complete) Stop() {
-	close(s.deliveries)
+func (s *complete) Start(in <-chan module.Delivery) <-chan module.Delivery {
+	go func() {
+		for delivery := range in {
+			err := s.sender.OnSend(delivery)
+			if err == nil {
+				delivery.Complete()
+			} else {
+				delivery.Cancel(err)
+			}
+		}
+	}()
+
+	return nil
 }
 
-func (s *complete) Deliveries() chan module.Delivery {
-	return s.deliveries
-}
-
-func (s *complete) Bind(prev Stage) {
-	s.prev = prev.(ResultStage)
+func (s *complete) Stop() error {
+	return nil
 }

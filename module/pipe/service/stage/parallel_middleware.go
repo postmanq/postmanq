@@ -26,7 +26,7 @@ func NewParallelMiddleware() Out {
 				}
 
 				return &parallelMiddleware{
-					deliveries:  make(chan module.Delivery, chanSize),
+					out:         make(chan module.Delivery, chanSize),
 					middlewares: middlewares,
 				}, nil
 			},
@@ -35,52 +35,52 @@ func NewParallelMiddleware() Out {
 }
 
 type parallelMiddleware struct {
-	deliveries  chan module.Delivery
+	out         chan module.Delivery
 	middlewares []module.ProcessComponent
-	prev        ResultStage
-	next        DeliveryStage
 }
 
-func (s *parallelMiddleware) Start() error {
-	defer func() {
-		close(s.deliveries)
-	}()
-
-	middlewareLen := len(s.middlewares)
-	for delivery := range s.deliveries {
-		wg := new(sync.WaitGroup)
-		wg.Add(middlewareLen)
-
-		for y := 0; y < middlewareLen; y++ {
-			go func(middleware module.ProcessComponent) {
-				err := middleware.OnProcess(delivery)
-				if err != nil {
-					delivery.Err = multierr.Append(delivery.Err, err)
-				}
-				wg.Done()
-			}(s.middlewares[y])
-		}
-
-		wg.Wait()
-		if delivery.Err == nil {
-			s.next.Deliveries() <- delivery
-		} else {
-			s.prev.Results() <- delivery
+func (s *parallelMiddleware) Init() error {
+	for _, middleware := range s.middlewares {
+		cmp, ok := middleware.(module.InitComponent)
+		if ok {
+			return cmp.OnInit()
 		}
 	}
 
 	return nil
 }
 
-func (s *parallelMiddleware) Deliveries() chan module.Delivery {
-	return s.deliveries
+func (s *parallelMiddleware) Start(in <-chan module.Delivery) <-chan module.Delivery {
+	middlewareLen := len(s.middlewares)
+	go func() {
+		for delivery := range in {
+			wg := new(sync.WaitGroup)
+			wg.Add(middlewareLen)
+
+			var multiErr error
+			for y := 0; y < middlewareLen; y++ {
+				go func(middleware module.ProcessComponent) {
+					err := middleware.OnProcess(delivery)
+					if err != nil {
+						multiErr = multierr.Append(multiErr, err)
+					}
+					wg.Done()
+				}(s.middlewares[y])
+			}
+
+			wg.Wait()
+			if multiErr == nil {
+				delivery.Next(s.out)
+			} else {
+				delivery.Cancel(multiErr)
+			}
+		}
+	}()
+
+	return s.out
 }
 
-func (s *parallelMiddleware) Bind(any Stage) {
-	switch a := any.(type) {
-	case ResultStage:
-		s.prev = a
-	case DeliveryStage:
-		s.next = a
-	}
+func (s *parallelMiddleware) Stop() error {
+	close(s.out)
+	return nil
 }

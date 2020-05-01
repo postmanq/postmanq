@@ -4,6 +4,7 @@ import (
 	"github.com/postmanq/postmanq/module"
 	"github.com/postmanq/postmanq/module/pipe/entity"
 	"github.com/postmanq/postmanq/module/pipe/errors"
+	"log"
 )
 
 func NewReceive() Out {
@@ -18,9 +19,8 @@ func NewReceive() Out {
 				}
 
 				return &receive{
-					receiver:   receiver,
-					deliveries: make(chan module.Delivery, chanSize),
-					results:    make(chan module.Delivery, chanSize),
+					receiver: receiver,
+					out:      make(chan module.Delivery, chanSize),
 				}, nil
 			},
 		},
@@ -28,31 +28,30 @@ func NewReceive() Out {
 }
 
 type receive struct {
-	receiver   module.ReceiveComponent
-	next       DeliveryStage
-	deliveries chan module.Delivery
-	results    chan module.Delivery
+	receiver module.ReceiveComponent
+	out      chan module.Delivery
 }
 
-func (s *receive) Start() error {
-	defer func() {
-		close(s.deliveries)
-		close(s.results)
-	}()
+func (s *receive) Init() error {
+	cmp, ok := s.receiver.(module.InitComponent)
+	if ok {
+		return cmp.OnInit()
+	}
 
+	return nil
+}
+
+func (s *receive) Start(in <-chan module.Delivery) <-chan module.Delivery {
 	go func() {
-		for delivery := range s.deliveries {
-			s.next.Deliveries() <- delivery
+		err := s.receiver.OnReceive(s.out)
+		if err != nil {
+			log.Fatal(err)
 		}
 	}()
-
-	return s.receiver.OnReceive(s.deliveries, s.results)
+	return s.out
 }
 
-func (s *receive) Results() chan module.Delivery {
-	return s.results
-}
-
-func (s *receive) Bind(next Stage) {
-	s.next = next.(DeliveryStage)
+func (s *receive) Stop() error {
+	close(s.out)
+	return nil
 }

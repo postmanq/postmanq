@@ -9,7 +9,17 @@ import (
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/multierr"
 	"testing"
+	"time"
 )
+
+type ReceiveComponent struct {
+	out chan module.Delivery
+}
+
+func (c *ReceiveComponent) OnReceive(out chan module.Delivery) error {
+	c.out = out
+	return nil
+}
 
 func TestStageSuite(t *testing.T) {
 	suite.Run(t, new(StageSuite))
@@ -17,11 +27,11 @@ func TestStageSuite(t *testing.T) {
 
 type StageSuite struct {
 	suite.Suite
-	receiveStage            stage.ResultStage
-	middlewareStage         stage.DeliveryStage
-	parallelMiddlewareStage stage.DeliveryStage
-	completeStage           stage.DeliveryStage
-	receiver                *mm.ReceiveComponent
+	receiveStage            stage.Stage
+	middlewareStage         stage.Stage
+	parallelMiddlewareStage stage.Stage
+	completeStage           stage.Stage
+	receiver                *ReceiveComponent
 	middleware              *mm.ProcessComponent
 	parallelMiddleware1     *mm.ProcessComponent
 	parallelMiddleware2     *mm.ProcessComponent
@@ -30,7 +40,7 @@ type StageSuite struct {
 }
 
 func (s *StageSuite) SetupTest() {
-	s.receiver = new(mm.ReceiveComponent)
+	s.receiver = new(ReceiveComponent)
 	s.sender = new(mm.SendComponent)
 	s.middleware = new(mm.ProcessComponent)
 	s.parallelMiddleware1 = new(mm.ProcessComponent)
@@ -39,15 +49,15 @@ func (s *StageSuite) SetupTest() {
 
 	receiveStage, err := stage.NewReceive().Constructor(nil, s.receiver)
 	s.Nil(err)
-	s.receiveStage = receiveStage.(stage.ResultStage)
+	s.receiveStage = receiveStage
 
 	completeStage, err := stage.NewComplete().Constructor(nil, s.sender)
 	s.Nil(err)
-	s.completeStage = completeStage.(stage.DeliveryStage)
+	s.completeStage = completeStage
 
 	middlewareStage, err := stage.NewMiddleware().Constructor(nil, s.middleware)
 	s.Nil(err)
-	s.middlewareStage = middlewareStage.(stage.DeliveryStage)
+	s.middlewareStage = middlewareStage
 
 	parallelMiddlewareStage, err := stage.NewParallelMiddleware().Constructor(nil, []interface{}{
 		s.parallelMiddleware1,
@@ -55,96 +65,89 @@ func (s *StageSuite) SetupTest() {
 		s.parallelMiddleware3,
 	})
 	s.Nil(err)
-	s.parallelMiddlewareStage = parallelMiddlewareStage.(stage.DeliveryStage)
-
-	s.receiveStage.Bind(s.middlewareStage)
-
-	s.middlewareStage.Bind(s.receiveStage)
-	s.middlewareStage.Bind(s.parallelMiddlewareStage)
-
-	s.parallelMiddlewareStage.Bind(s.receiveStage)
-	s.parallelMiddlewareStage.Bind(s.completeStage)
-
-	s.completeStage.Bind(s.receiveStage)
+	s.parallelMiddlewareStage = parallelMiddlewareStage
 }
 
-func (s *StageSuite) TestReceiveStageFailure() {
-	s.receiver.On("OnReceive", mock.Anything, mock.Anything).Return(fmt.Errorf("receiver error")).Once()
-	s.NotNil(s.receiveStage.Start())
-	s.receiver.AssertNumberOfCalls(s.T(), "OnReceive", 1)
-}
-
-func (s *StageSuite) TestReceiveStageSuccess() {
-	s.receiver.On("OnReceive", mock.Anything, mock.Anything).Return(nil).Once()
-	s.Nil(s.receiveStage.Start())
-	s.receiver.AssertNumberOfCalls(s.T(), "OnReceive", 1)
+func (s *StageSuite) TestReceiveStage() {
+	receiveOut := s.receiveStage.Start(nil)
+	time.Sleep(time.Second)
+	s.receiver.out <- module.Delivery{}
+	d := <-receiveOut
+	s.NotNil(d)
 }
 
 func (s *StageSuite) TestMiddlewareStage() {
+	receiveOut := s.receiveStage.Start(nil)
 	err := fmt.Errorf("middleware error")
-	go func() {
-		err := s.middlewareStage.Start()
-		s.Nil(err)
-	}()
+	middlewareOut := s.middlewareStage.Start(receiveOut)
+	time.Sleep(time.Second)
 
 	s.middleware.On("OnProcess", mock.Anything).Return(err).Once()
-	s.middlewareStage.Deliveries() <- module.Delivery{}
-	result := <-s.receiveStage.Results()
-	s.NotNil(result)
-	s.Equal(err, result.Err)
+	d := module.Delivery{
+		Err: make(chan error, 1),
+	}
+	s.receiver.out <- d
+	e := <-d.Err
+	s.NotNil(e)
+	s.Equal(err, e)
 
 	s.middleware.On("OnProcess", mock.Anything).Return(nil).Once()
-	s.middlewareStage.Deliveries() <- module.Delivery{}
-	delivery := <-s.parallelMiddlewareStage.Deliveries()
-	s.NotNil(delivery)
-	s.Nil(delivery.Err)
+	s.receiver.out <- d
+	d = <-middlewareOut
+	s.NotNil(d)
 	s.middleware.AssertNumberOfCalls(s.T(), "OnProcess", 2)
 }
 
 func (s *StageSuite) TestParallelMiddlewareStage() {
+	receiveOut := s.receiveStage.Start(nil)
 	err := fmt.Errorf("parallel middleware error")
-	combinedErr := multierr.Combine(err, err)
-	go func() {
-		err := s.parallelMiddlewareStage.Start()
-		s.Nil(err)
-	}()
+	var multiErr error
+	multiErr = multierr.Append(multiErr, err)
+	multiErr = multierr.Append(multiErr, err)
+	parallelMiddlewareOut := s.parallelMiddlewareStage.Start(receiveOut)
+	time.Sleep(time.Second)
 
 	s.parallelMiddleware1.On("OnProcess", mock.Anything).Return(err).Once()
 	s.parallelMiddleware2.On("OnProcess", mock.Anything).Return(err).Once()
 	s.parallelMiddleware3.On("OnProcess", mock.Anything).Return(nil).Once()
-	s.parallelMiddlewareStage.Deliveries() <- module.Delivery{}
-	result := <-s.receiveStage.Results()
-	s.NotNil(result)
-	s.Equal(combinedErr, result.Err)
+	d := module.Delivery{
+		Err: make(chan error, 1),
+	}
+	s.receiver.out <- d
+	e := <-d.Err
+	s.NotNil(e)
+	s.Equal(multiErr, e)
 
 	s.parallelMiddleware1.On("OnProcess", mock.Anything).Return(nil).Once()
 	s.parallelMiddleware2.On("OnProcess", mock.Anything).Return(nil).Once()
 	s.parallelMiddleware3.On("OnProcess", mock.Anything).Return(nil).Once()
-	s.parallelMiddlewareStage.Deliveries() <- module.Delivery{}
-	delivery := <-s.completeStage.Deliveries()
+	s.receiver.out <- d
+	delivery := <-parallelMiddlewareOut
 	s.NotNil(delivery)
-	s.Nil(delivery.Err)
 	s.parallelMiddleware1.AssertNumberOfCalls(s.T(), "OnProcess", 2)
 	s.parallelMiddleware2.AssertNumberOfCalls(s.T(), "OnProcess", 2)
 	s.parallelMiddleware3.AssertNumberOfCalls(s.T(), "OnProcess", 2)
 }
 
 func (s *StageSuite) TestCompleteStage() {
+	receiveOut := s.receiveStage.Start(nil)
 	err := fmt.Errorf("complete error")
-	go func() {
-		err := s.completeStage.Start()
-		s.Nil(err)
-	}()
+	s.completeStage.Start(receiveOut)
+	time.Sleep(time.Second)
 
 	s.sender.On("OnSend", mock.Anything).Return(err).Once()
-	s.completeStage.Deliveries() <- module.Delivery{}
-	result := <-s.receiveStage.Results()
-	s.NotNil(result)
-	s.Equal(err, result.Err)
+	d := module.Delivery{
+		Err: make(chan error, 1),
+	}
+	s.receiver.out <- d
+	e := <-d.Err
+	s.NotNil(e)
+	s.Equal(err, e)
 
 	s.sender.On("OnSend", mock.Anything).Return(nil).Once()
-	s.completeStage.Deliveries() <- module.Delivery{}
-	result = <-s.receiveStage.Results()
-	s.NotNil(result)
-	s.Nil(result.Err)
+	d = module.Delivery{
+		Err: make(chan error, 1),
+	}
+	s.receiver.out <- d
+	s.Nil(<-d.Err)
 }

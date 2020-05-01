@@ -18,7 +18,7 @@ func NewMiddleware() Out {
 				}
 
 				return &middleware{
-					deliveries: make(chan module.Delivery, chanSize),
+					out:        make(chan module.Delivery, chanSize),
 					middleware: m,
 				}, nil
 			},
@@ -27,39 +27,35 @@ func NewMiddleware() Out {
 }
 
 type middleware struct {
-	deliveries chan module.Delivery
+	out        chan module.Delivery
 	middleware module.ProcessComponent
-	prev       ResultStage
-	next       DeliveryStage
 }
 
-func (s *middleware) Start() error {
-	defer func() {
-		close(s.deliveries)
-	}()
-
-	for delivery := range s.deliveries {
-		delivery.Err = s.middleware.OnProcess(delivery)
-
-		if delivery.Err == nil {
-			s.next.Deliveries() <- delivery
-		} else {
-			s.prev.Results() <- delivery
-		}
+func (s *middleware) Init() error {
+	cmp, ok := s.middleware.(module.InitComponent)
+	if ok {
+		return cmp.OnInit()
 	}
 
 	return nil
 }
 
-func (s *middleware) Deliveries() chan module.Delivery {
-	return s.deliveries
+func (s *middleware) Start(in <-chan module.Delivery) <-chan module.Delivery {
+	go func() {
+		for delivery := range in {
+			err := s.middleware.OnProcess(delivery)
+			if err == nil {
+				delivery.Next(s.out)
+			} else {
+				delivery.Cancel(err)
+			}
+		}
+	}()
+
+	return s.out
 }
 
-func (s *middleware) Bind(any Stage) {
-	switch a := any.(type) {
-	case ResultStage:
-		s.prev = a
-	case DeliveryStage:
-		s.next = a
-	}
+func (s *middleware) Stop() error {
+	close(s.out)
+	return nil
 }

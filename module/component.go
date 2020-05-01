@@ -30,7 +30,7 @@ type InitComponent interface {
 }
 
 type ReceiveComponent interface {
-	OnReceive(chan Delivery, chan Delivery) error
+	OnReceive(chan Delivery) error
 }
 
 type SendComponent interface {

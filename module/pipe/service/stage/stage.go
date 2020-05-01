@@ -32,18 +32,7 @@ type Descriptor struct {
 }
 
 type Stage interface {
-	//Init() error
-	Start() error
-	//Stop() error
-	Bind(Stage)
-}
-
-type ResultStage interface {
-	Stage
-	Results() chan module.Delivery
-}
-
-type DeliveryStage interface {
-	Stage
-	Deliveries() chan module.Delivery
+	Init() error
+	Start(<-chan module.Delivery) <-chan module.Delivery
+	Stop() error
 }

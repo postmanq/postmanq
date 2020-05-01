@@ -20,5 +20,6 @@ type pipelineFactory struct {
 }
 
 func (f *pipelineFactory) Create(cfg entity.Pipeline) (service.Pipeline, error) {
+
 	return nil, nil
 }
