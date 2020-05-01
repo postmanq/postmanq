@@ -96,17 +96,18 @@ func (c *receiver) OnInit() error {
 	return nil
 }
 
-func (c *receiver) OnReceive(out chan module.Delivery, in chan module.Delivery) error {
+func (c *receiver) OnReceive(out chan module.Delivery) error {
 	deliveries, err := c.subscriber.Subscribe(context.Background())
 	if err != nil {
 		return err
 	}
 
 	for delivery := range deliveries {
-		out <- module.Delivery{}
-		result := <-in
+		d := module.Delivery{}
+		out <- d
+		err = <-d.Err
 
-		if result.Err == nil {
+		if err == nil {
 			err := delivery.Ack(false)
 			if err != nil {
 				return err

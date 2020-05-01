@@ -13,21 +13,21 @@ type RunnerIn struct {
 	fx.In
 	ConfigProvider   cs.ConfigProvider
 	ComponentFactory factory.ComponentFactory
-	PipelineFactory  factory.PipelineFactory
-	Components       []module.ComponentDescriptor `group:"component"`
+	PipelineFactory  service.PipelineFactory
+	Descriptors      []module.ComponentDescriptor `group:"component"`
 }
 
 type Runner struct {
 	configProvider   cs.ConfigProvider
-	components       []module.ComponentDescriptor
+	descriptors      []module.ComponentDescriptor
 	componentFactory factory.ComponentFactory
-	pipelineFactory  factory.PipelineFactory
+	pipelineFactory  service.PipelineFactory
 }
 
 func NewRunner(in RunnerIn) *Runner {
 	return &Runner{
 		configProvider: in.ConfigProvider,
-		components:     in.Components,
+		descriptors:    in.Descriptors,
 	}
 }
 
@@ -38,21 +38,28 @@ func (c *Runner) Run() error {
 		return err
 	}
 
-	for _, component := range c.components {
+	for _, component := range c.descriptors {
 		err = c.componentFactory.Register(component)
 		if err != nil {
 			return err
 		}
 	}
 
-	pipelines := make([]service.Pipeline, 0)
-	for _, pipelineConfig := range pipelineConfigs {
+	pipelines := make([]service.Pipeline, len(pipelineConfigs))
+	for i, pipelineConfig := range pipelineConfigs {
 		pipeline, err := c.pipelineFactory.Create(pipelineConfig)
 		if err != nil {
 			return err
 		}
 
-		pipelines = append(pipelines, pipeline)
+		pipelines[i] = pipeline
+	}
+
+	for _, pipeline := range pipelines {
+		err := pipeline.Init()
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, pipeline := range pipelines {
