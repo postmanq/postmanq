@@ -11,11 +11,6 @@ import (
 	"github.com/streadway/amqp"
 )
 
-const (
-	prefix       = "postmanq"
-	exchangeKind = "direct"
-)
-
 type Receiver interface {
 	OnInit() error
 	OnReceive(out chan module.Delivery) error
@@ -27,6 +22,8 @@ type receiver struct {
 	validator        vs.Validator
 	repeatPublishers []qs.Publisher
 	subscriber       qs.Subscriber
+	prefix           string
+	exchangeKind     string
 }
 
 func NewReceiver(
@@ -37,12 +34,19 @@ func NewReceiver(
 	return module.ComponentOut{
 		Descriptor: module.ComponentDescriptor{
 			Name: "rabbitmq/receiver",
-			Construct: func(module.ComponentConfig) interface{} {
+			Construct: func(cfg module.ComponentConfig) interface{} {
+				var prefix string
+				if rawPrefix, ok := cfg["prefix"]; ok {
+					prefix = rawPrefix.(string)
+				}
+
 				return &receiver{
 					configProvider:   configProvider,
 					pool:             pool,
 					validator:        validator,
 					repeatPublishers: make([]qs.Publisher, 0),
+					prefix:           prefix,
+					exchangeKind:     "direct",
 				}
 			},
 		},
@@ -67,8 +71,8 @@ func (c *receiver) OnInit() error {
 	}
 
 	c.subscriber, err = c.pool.CreateSubscriber(context.Background(), entity.Queue{
-		Name:          prefix,
-		Exchange:      prefix,
+		Name:          c.prefix,
+		Exchange:      c.prefix,
 		Durable:       true,
 		PrefetchCount: 1,
 	})
@@ -78,12 +82,12 @@ func (c *receiver) OnInit() error {
 
 	for _, repeat := range cfg.Repeats {
 		repeatPublisher, err := c.pool.CreatePublisher(context.Background(), entity.Exchange{
-			Name:    fmt.Sprintf("%s.repeat.%s", prefix, repeat.String()),
-			Kind:    exchangeKind,
+			Name:    fmt.Sprintf("%s.repeat.%s", c.prefix, repeat.String()),
+			Kind:    c.exchangeKind,
 			Durable: true,
 			Args: amqp.Table{
 				"x-message-ttl":          int64(repeat.Seconds()) * 1000,
-				"x-dead-letter-exchange": prefix,
+				"x-dead-letter-exchange": c.prefix,
 			},
 		})
 		if err != nil {

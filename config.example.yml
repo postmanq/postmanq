@@ -1,7 +1,3 @@
-modules:
-  - config
-  - queue
-
 queue:
   url:
   repeats:
@@ -23,13 +19,16 @@ pipelines:
     stages:
       - type: receive
         components:
-          - queue/receiver
+          - name: rabbitmq/receiver
+            config:
+              prefix: postmanq
       - type: middleware
-        component: component1
+        component:
+          name: smtp/parser
       - type: parallel_middleware
         components:
-          - component2
-          - component3
-          - component4
+          - name: smtp/connector
+          - name: smtp/signature
       - type: complete
-        component: email/sender
+        component:
+          name: smtp/sender

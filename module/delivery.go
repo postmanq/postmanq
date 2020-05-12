@@ -1,7 +1,17 @@
 package module
 
+import "net/smtp"
+
+type Email struct {
+	Sender        string
+	Recipient     string
+	RecipientHost string
+	Client        *smtp.Client
+}
+
 type Delivery struct {
-	Err chan error
+	Email *Email
+	Err   chan error
 }
 
 func (d Delivery) Cancel(err error) {
