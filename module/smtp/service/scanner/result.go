@@ -27,17 +27,14 @@ type result struct {
 }
 
 func (s *result) GetHostname() string {
-	defer s.wg.Wait()
 	return s.hostname
 }
 
 func (s *result) GetStatus() ResultStatus {
-	defer s.wg.Wait()
 	return s.status
 }
 
 func (s *result) GetMxs() []entity.MX {
-	defer s.wg.Wait()
 	return s.mxs
 }
 

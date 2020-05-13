@@ -53,18 +53,19 @@ func (s *scanner) processFutureResults() {
 func (s *scanner) Scan(hostname string) Result {
 	s.mtx.Lock()
 	defer s.mtx.Unlock()
-	existsResult, ok := s.results[hostname]
-	if ok {
-		return existsResult
+	r, ok := s.results[hostname]
+	if !ok {
+		r := &result{
+			hostname: hostname,
+			wg:       new(sync.WaitGroup),
+		}
+
+		r.lock()
+		s.results[hostname] = r
+		s.futureResults <- r
+
 	}
 
-	futureResult := &result{
-		hostname: hostname,
-		wg:       new(sync.WaitGroup),
-	}
-
-	futureResult.lock()
-	s.results[hostname] = futureResult
-	s.futureResults <- futureResult
-	return futureResult
+	defer r.wg.Wait()
+	return r
 }
