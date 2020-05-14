@@ -2,7 +2,9 @@ package scanner
 
 import (
 	"github.com/postmanq/postmanq/module/smtp/entity"
+	"github.com/postmanq/postmanq/module/smtp/errors"
 	"net"
+	"strings"
 	"sync"
 )
 
@@ -28,26 +30,37 @@ type scanner struct {
 
 func (s *scanner) processFutureResults() {
 	for futureResult := range s.futureResults {
-		mxs, err := net.LookupMX(futureResult.hostname)
+		status, err := s.processResult(futureResult)
+		futureResult.err = err
+		futureResult.unlockWithStatus(status)
+	}
+}
+
+func (s *scanner) processResult(futureResult *result) (ResultStatus, error) {
+	mxs, err := net.LookupMX(futureResult.hostname)
+	if err != nil {
+		return ResultStatusFailureMX, err
+	}
+
+	futureResult.mxs = make([]entity.MX, len(mxs))
+	for i, mx := range mxs {
+		ips, err := net.LookupIP(mx.Host)
 		if err != nil {
-			//return err
+			return ResultStatusFailureIP, err
 		}
 
-		futureResult.mxs = make([]entity.MX, len(mxs))
-		for i, mx := range mxs {
-			ips, err := net.LookupIP(mx.Host)
-			if err != nil {
+		if len(ips) == 0 {
+			return ResultStatusFailureIPLen, errors.IPsIsNotFoundByMX(mx.Host)
+		}
 
-			}
-
-			futureResult.mxs[i] = entity.MX{
-				MX: mx,
-				IP: ips[0],
-			}
-
-			futureResult.unlockWithStatus(ResultStatusSuccess)
+		mx.Host = strings.TrimRight(mx.Host, ".")
+		futureResult.mxs[i] = entity.MX{
+			MX: mx,
+			IP: ips[0],
 		}
 	}
+
+	return ResultStatusSuccess, nil
 }
 
 func (s *scanner) Scan(hostname string) Result {
@@ -55,7 +68,7 @@ func (s *scanner) Scan(hostname string) Result {
 	defer s.mtx.Unlock()
 	r, ok := s.results[hostname]
 	if !ok {
-		r := &result{
+		r = &result{
 			hostname: hostname,
 			wg:       new(sync.WaitGroup),
 		}
@@ -63,7 +76,6 @@ func (s *scanner) Scan(hostname string) Result {
 		r.lock()
 		s.results[hostname] = r
 		s.futureResults <- r
-
 	}
 
 	defer r.wg.Wait()

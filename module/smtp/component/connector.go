@@ -12,7 +12,8 @@ type connector struct {
 func (c *connector) OnProcess(delivery module.Delivery) error {
 	result := c.scanner.Scan(delivery.Email.RecipientHost)
 	if result.GetStatus() != scanner.ResultStatusSuccess {
-
+		return result.GetError()
 	}
+
 	return nil
 }
