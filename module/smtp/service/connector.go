@@ -1,13 +1,24 @@
 package service
 
-import (
-	"github.com/postmanq/postmanq/module/smtp/entity"
-	"net/smtp"
-)
+import "sync"
 
-type connector struct {
+type Connector interface {
+	Connect(ScannerResult) (ClientPool, error)
 }
 
-func (c *connector) Connect(mx entity.MX) (*smtp.Client, error) {
-	return &smtp.Client{}, nil
+type connector struct {
+	mtx   *sync.Mutex
+	pools map[string]*clientPool
+}
+
+func (c *connector) Connect(result ScannerResult) (ClientPool, error) {
+	c.mtx.Lock()
+	defer c.mtx.Unlock()
+	pool, ok := c.pools[result.GetHostname()]
+	if !ok {
+		pool = &clientPool{}
+		c.pools[result.GetHostname()] = pool
+	}
+
+	return pool, nil
 }
