@@ -4,48 +4,38 @@ import (
 	"context"
 	"fmt"
 	"github.com/postmanq/postmanq/module"
-	cs "github.com/postmanq/postmanq/module/config/service"
 	"github.com/postmanq/postmanq/module/rabbitmq/entity"
 	qs "github.com/postmanq/postmanq/module/rabbitmq/service"
 	vs "github.com/postmanq/postmanq/module/validator/service"
 	"github.com/streadway/amqp"
 )
 
-type Receiver interface {
-	OnInit() error
-	OnReceive(out chan module.Delivery) error
-}
-
 type receiver struct {
-	configProvider   cs.ConfigProvider
+	ctx              context.Context
+	configProvider   module.ConfigProvider
 	pool             qs.Pool
 	validator        vs.Validator
 	repeatPublishers []qs.Publisher
 	subscriber       qs.Subscriber
-	prefix           string
+	url              string
 	exchangeKind     string
 }
 
 func NewReceiver(
-	configProvider cs.ConfigProvider,
+	ctx context.Context,
 	pool qs.Pool,
 	validator vs.Validator,
 ) module.ComponentOut {
 	return module.ComponentOut{
 		Descriptor: module.ComponentDescriptor{
 			Name: "rabbitmq/receiver",
-			Construct: func(cfg module.ComponentConfig) interface{} {
-				var prefix string
-				if rawPrefix, ok := cfg["prefix"]; ok {
-					prefix = rawPrefix.(string)
-				}
-
+			Construct: func(configProvider module.ConfigProvider) interface{} {
 				return &receiver{
+					ctx:              ctx,
 					configProvider:   configProvider,
 					pool:             pool,
 					validator:        validator,
 					repeatPublishers: make([]qs.Publisher, 0),
-					prefix:           prefix,
 					exchangeKind:     "direct",
 				}
 			},
@@ -55,7 +45,7 @@ func NewReceiver(
 
 func (c *receiver) OnInit() error {
 	var cfg entity.Config
-	err := c.configProvider.Populate("queue", &cfg)
+	err := c.configProvider.Populate("", &cfg)
 	if err != nil {
 		return err
 	}
@@ -65,14 +55,18 @@ func (c *receiver) OnInit() error {
 		return err
 	}
 
+	if len(cfg.Prefix) == 0 {
+		cfg.Prefix = "postmanq"
+	}
+
 	err = c.pool.Connect([]string{cfg.Url})
 	if err != nil {
 		return err
 	}
 
-	c.subscriber, err = c.pool.CreateSubscriber(context.Background(), entity.Queue{
-		Name:          c.prefix,
-		Exchange:      c.prefix,
+	c.subscriber, err = c.pool.CreateSubscriber(c.ctx, entity.Queue{
+		Name:          cfg.Prefix,
+		Exchange:      cfg.Prefix,
 		Durable:       true,
 		PrefetchCount: 1,
 	})
@@ -81,13 +75,13 @@ func (c *receiver) OnInit() error {
 	}
 
 	for _, repeat := range cfg.Repeats {
-		repeatPublisher, err := c.pool.CreatePublisher(context.Background(), entity.Exchange{
-			Name:    fmt.Sprintf("%s.repeat.%s", c.prefix, repeat.String()),
+		repeatPublisher, err := c.pool.CreatePublisher(c.ctx, entity.Exchange{
+			Name:    fmt.Sprintf("%s.repeat.%s", cfg.Prefix, repeat.String()),
 			Kind:    c.exchangeKind,
 			Durable: true,
 			Args: amqp.Table{
 				"x-message-ttl":          int64(repeat.Seconds()) * 1000,
-				"x-dead-letter-exchange": c.prefix,
+				"x-dead-letter-exchange": cfg.Prefix,
 			},
 		})
 		if err != nil {

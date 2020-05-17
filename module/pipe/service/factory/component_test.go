@@ -2,10 +2,12 @@ package factory_test
 
 import (
 	mm "github.com/postmanq/postmanq/mock/module"
+	service2 "github.com/postmanq/postmanq/mock/module/config/service"
 	"github.com/postmanq/postmanq/module"
 	"github.com/postmanq/postmanq/module/pipe/entity"
 	"github.com/postmanq/postmanq/module/pipe/errors"
 	"github.com/postmanq/postmanq/module/pipe/service/factory"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"testing"
 )
@@ -21,10 +23,12 @@ type ComponentFactorySuite struct {
 }
 
 func (s *ComponentFactorySuite) SetupTest() {
-	s.factory = factory.NewComponent()
+	configProviderFactory := new(service2.ConfigProviderFactory)
+	configProviderFactory.On("CreateFromMap", mock.Anything).Return(new(service2.ConfigProvider), nil)
+	s.factory = factory.NewComponent(configProviderFactory)
 	s.validDescriptor = module.ComponentDescriptor{
 		Name: "component1",
-		Construct: func(configs module.ComponentConfig) interface{} {
+		Construct: func(configs module.ConfigProvider) interface{} {
 			return new(mm.InitComponent)
 		},
 	}

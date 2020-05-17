@@ -9,6 +9,7 @@ var (
 	PqModule module.DescriptorConstruct = func() module.Descriptor {
 		return module.Descriptor{
 			Constructs: []interface{}{
+				service.NewConfigProviderFactory,
 				service.NewConfigProviderByArgs,
 			},
 		}

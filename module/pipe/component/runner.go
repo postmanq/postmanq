@@ -2,7 +2,6 @@ package component
 
 import (
 	"github.com/postmanq/postmanq/module"
-	cs "github.com/postmanq/postmanq/module/config/service"
 	"github.com/postmanq/postmanq/module/pipe/entity"
 	"github.com/postmanq/postmanq/module/pipe/service"
 	"github.com/postmanq/postmanq/module/pipe/service/factory"
@@ -11,14 +10,14 @@ import (
 
 type RunnerIn struct {
 	fx.In
-	ConfigProvider   cs.ConfigProvider
+	ConfigProvider   module.ConfigProvider
 	ComponentFactory factory.ComponentFactory
 	PipelineFactory  service.PipelineFactory
 	Descriptors      []module.ComponentDescriptor `group:"component"`
 }
 
 type Runner struct {
-	configProvider   cs.ConfigProvider
+	configProvider   module.ConfigProvider
 	descriptors      []module.ComponentDescriptor
 	componentFactory factory.ComponentFactory
 	pipelineFactory  service.PipelineFactory

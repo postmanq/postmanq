@@ -2,18 +2,15 @@ package service
 
 import (
 	"github.com/postmanq/postmanq/cli"
+	"github.com/postmanq/postmanq/module"
 	"go.uber.org/config"
 )
 
-type ConfigProvider interface {
-	Populate(string, interface{}) error
-}
-
-func NewConfigProviderByArgs(args cli.Arguments) (ConfigProvider, error) {
+func NewConfigProviderByArgs(args cli.Arguments) (module.ConfigProvider, error) {
 	return NewConfigProviderByFile(args.ConfigFilename)
 }
 
-func NewConfigProviderByOptions(options ...config.YAMLOption) (ConfigProvider, error) {
+func NewConfigProviderByOptions(options ...config.YAMLOption) (module.ConfigProvider, error) {
 	provider, err := config.NewYAML(options...)
 	if err != nil {
 		return nil, err
@@ -22,7 +19,7 @@ func NewConfigProviderByOptions(options ...config.YAMLOption) (ConfigProvider, e
 	return &configProvider{provider}, nil
 }
 
-func NewConfigProviderByFile(filename string) (ConfigProvider, error) {
+func NewConfigProviderByFile(filename string) (module.ConfigProvider, error) {
 	return NewConfigProviderByOptions(config.File(filename))
 }
 

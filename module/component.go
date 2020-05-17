@@ -2,9 +2,11 @@ package module
 
 import "go.uber.org/fx"
 
-type ComponentConfig map[string]interface{}
+type ConfigProvider interface {
+	Populate(string, interface{}) error
+}
 
-type ComponentConstruct func(ComponentConfig) interface{}
+type ComponentConstruct func(ConfigProvider) interface{}
 
 type ComponentOut struct {
 	fx.Out

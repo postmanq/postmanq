@@ -1,8 +1,6 @@
 package entity
 
-import "github.com/postmanq/postmanq/module"
-
 type Component struct {
-	Name   string                 `yaml:"name"`
-	Config module.ComponentConfig `yaml:"config"`
+	Name   string            `yaml:"name"`
+	Config map[string]string `yaml:"config"`
 }

@@ -1,14 +1,5 @@
 package module
 
-import "net/smtp"
-
-type Email struct {
-	Sender        string
-	Recipient     string
-	RecipientHost string
-	Client        *smtp.Client
-}
-
 type Delivery struct {
 	Email *Email
 	Err   chan error

@@ -1,15 +1,22 @@
 package component_test
 
 import (
+	"context"
 	"errors"
 	cs "github.com/postmanq/postmanq/mock/module/config/service"
 	rs "github.com/postmanq/postmanq/mock/module/rabbitmq/service"
 	vs "github.com/postmanq/postmanq/mock/module/validator/service"
+	"github.com/postmanq/postmanq/module"
 	"github.com/postmanq/postmanq/module/rabbitmq/component"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"testing"
 )
+
+type ReceiveComponent interface {
+	module.InitComponent
+	module.ReceiveComponent
+}
 
 var (
 	defaultError     = errors.New("")
@@ -25,7 +32,7 @@ type ReceiverSuite struct {
 	configProvider *cs.ConfigProvider
 	pool           *rs.Pool
 	validator      *vs.Validator
-	receiver       component.Receiver
+	receiver       ReceiveComponent
 }
 
 func (s *ReceiverSuite) SetupTest() {
@@ -33,10 +40,10 @@ func (s *ReceiverSuite) SetupTest() {
 	s.pool = new(rs.Pool)
 	s.validator = new(vs.Validator)
 	s.receiver = component.NewReceiver(
-		s.configProvider,
+		context.Background(),
 		s.pool,
 		s.validator,
-	).Descriptor.Construct(nil).(component.Receiver)
+	).Descriptor.Construct(s.configProvider).(ReceiveComponent)
 }
 
 func (s *ReceiverSuite) TestFailureConfig() {

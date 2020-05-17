@@ -1,30 +1,30 @@
-package scanner
+package service
 
 import (
 	"github.com/postmanq/postmanq/module/smtp/entity"
 	"sync"
 )
 
-type ResultStatus int
+type ScannerResultStatus int
 
 const (
-	ResultStatusProgress ResultStatus = iota
-	ResultStatusSuccess
-	ResultStatusFailureMX
-	ResultStatusFailureIP
-	ResultStatusFailureIPLen
+	ScannerResultStatusProgress ScannerResultStatus = iota
+	ScannerResultStatusSuccess
+	ScannerResultStatusFailureMX
+	ScannerResultStatusFailureIP
+	ScannerResultStatusFailureIPLen
 )
 
-type Result interface {
+type ScannerResult interface {
 	GetHostname() string
-	GetStatus() ResultStatus
+	GetStatus() ScannerResultStatus
 	GetMxs() []entity.MX
 	GetError() error
 }
 
 type result struct {
 	hostname string
-	status   ResultStatus
+	status   ScannerResultStatus
 	mxs      []entity.MX
 	wg       *sync.WaitGroup
 	err      error
@@ -34,7 +34,7 @@ func (s *result) GetHostname() string {
 	return s.hostname
 }
 
-func (s *result) GetStatus() ResultStatus {
+func (s *result) GetStatus() ScannerResultStatus {
 	return s.status
 }
 
@@ -44,10 +44,10 @@ func (s *result) GetMxs() []entity.MX {
 
 func (s *result) lock() {
 	s.wg.Add(1)
-	s.status = ResultStatusProgress
+	s.status = ScannerResultStatusProgress
 }
 
-func (s *result) unlockWithStatus(status ResultStatus) {
+func (s *result) unlockWithStatus(status ScannerResultStatus) {
 	s.status = status
 	s.wg.Done()
 }

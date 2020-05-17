@@ -62,6 +62,9 @@ func (a *App) Run(invoker interface{}) {
 		fx.Provide(func() Arguments {
 			return args
 		}),
+		fx.Provide(func() context.Context {
+			return context.Background()
+		}),
 		fx.Provide(constructs...),
 		fx.Invoke(invoker),
 	)

@@ -2,6 +2,7 @@ package factory
 
 import (
 	"github.com/postmanq/postmanq/module"
+	"github.com/postmanq/postmanq/module/config/service"
 	"github.com/postmanq/postmanq/module/pipe/entity"
 	"github.com/postmanq/postmanq/module/pipe/errors"
 )
@@ -11,14 +12,16 @@ type ComponentFactory interface {
 	Create(*entity.Component) (interface{}, error)
 }
 
-func NewComponent() ComponentFactory {
+func NewComponent(factory service.ConfigProviderFactory) ComponentFactory {
 	return &componentFactory{
 		descriptors: make(map[string]module.ComponentDescriptor),
+		factory:     factory,
 	}
 }
 
 type componentFactory struct {
 	descriptors map[string]module.ComponentDescriptor
+	factory     service.ConfigProviderFactory
 }
 
 func (f *componentFactory) Register(descriptor module.ComponentDescriptor) error {
@@ -37,5 +40,10 @@ func (f *componentFactory) Create(e *entity.Component) (interface{}, error) {
 		return nil, errors.ComponentDescriptorNotDefined(e.Name)
 	}
 
-	return descriptor.Construct(e.Config), nil
+	configProvider, err := f.factory.CreateFromMap(e.Config)
+	if err != nil {
+		return nil, err
+	}
+
+	return descriptor.Construct(configProvider), nil
 }
