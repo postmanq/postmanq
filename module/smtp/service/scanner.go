@@ -41,30 +41,34 @@ type scanner struct {
 
 func (s *scanner) processResults() {
 	for processableResult := range s.processableResults {
-		status, err := s.processResult(processableResult)
-		if err != nil {
-			s.rescanMtx.Lock()
-			key := time.Now().Add(time.Minute * 10).Format(s.layout)
-			if _, ok := s.failureResults[key]; !ok {
-				s.failureResults[key] = make([]*result, 0)
-			}
-
-			s.failureResults[key] = append(s.failureResults[key], processableResult)
-			s.rescanMtx.Unlock()
-		}
-
-		processableResult.err = err
-		processableResult.unlockWithStatus(status)
+		go s.processResult(processableResult)
 	}
 }
 
-func (s *scanner) processResult(processableResult *result) (ScannerResultStatus, error) {
+func (s *scanner) processResult(processableResult *result) {
+	status, err := s.scan(processableResult)
+	if err != nil {
+		s.rescanMtx.Lock()
+		key := time.Now().Add(time.Minute * 10).Format(s.layout)
+		if _, ok := s.failureResults[key]; !ok {
+			s.failureResults[key] = make([]*result, 0)
+		}
+
+		s.failureResults[key] = append(s.failureResults[key], processableResult)
+		s.rescanMtx.Unlock()
+	}
+
+	processableResult.err = err
+	processableResult.unlockWithStatus(status)
+}
+
+func (s *scanner) scan(processableResult *result) (ScannerResultStatus, error) {
 	mxs, err := net.LookupMX(processableResult.hostname)
 	if err != nil {
 		return ScannerResultStatusFailureMX, err
 	}
 
-	processableResult.mxs = make([]entity.MX, len(mxs))
+	processableResult.mxs = make(entity.MXs, len(mxs))
 	for i, mx := range mxs {
 		ips, err := net.LookupIP(mx.Host)
 		if err != nil {

@@ -7,8 +7,22 @@ import (
 )
 
 type sender struct {
-	scanner   service.Scanner
-	connector service.Connector
+	scanner        service.Scanner
+	connector      service.Connector
+	configProvider module.ConfigProvider
+}
+
+func NewSender() module.ComponentOut {
+	return module.ComponentOut{
+		Descriptor: module.ComponentDescriptor{
+			Name: "smtp/sender",
+			Construct: func(configProvider module.ConfigProvider) interface{} {
+				return &sender{
+					configProvider: configProvider,
+				}
+			},
+		},
+	}
 }
 
 func (c *sender) OnSend(delivery module.Delivery) error {
@@ -17,11 +31,7 @@ func (c *sender) OnSend(delivery module.Delivery) error {
 		return result.GetError()
 	}
 
-	pool, err := c.connector.Connect(result)
-	if err != nil {
-		return err
-	}
-
+	pool := c.connector.Connect(result)
 	client, err := pool.GetFree()
 	if err != nil {
 		return err

@@ -29,3 +29,9 @@ pipelines:
       - type: complete
         component:
           name: smtp/sender
+          config:
+            hostname: mail.postmanq.io
+            ips:
+              - 1.1.1.1
+              - 2.2.2.2
+              - 3.3.3.3

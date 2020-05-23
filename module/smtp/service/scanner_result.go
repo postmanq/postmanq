@@ -18,14 +18,14 @@ const (
 type ScannerResult interface {
 	GetHostname() string
 	GetStatus() ScannerResultStatus
-	GetMxs() []entity.MX
+	GetMxs() entity.MXs
 	GetError() error
 }
 
 type result struct {
 	hostname string
 	status   ScannerResultStatus
-	mxs      []entity.MX
+	mxs      entity.MXs
 	wg       *sync.WaitGroup
 	err      error
 }
@@ -38,7 +38,7 @@ func (s *result) GetStatus() ScannerResultStatus {
 	return s.status
 }
 
-func (s *result) GetMxs() []entity.MX {
+func (s *result) GetMxs() entity.MXs {
 	return s.mxs
 }
 
