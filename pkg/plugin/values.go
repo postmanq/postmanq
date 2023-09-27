@@ -1,10 +1,10 @@
-package module
+package plugin
 
 const (
 	ConstructName = "Plugin"
 )
 
-type PluginConstruct func() Plugin
+type Construct func() Plugin
 
 type Plugin struct {
 	Constructs []interface{}

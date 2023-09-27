@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	PqModule module.DescriptorConstruct = func() module.Descriptor {
-		return module.Descriptor{
+	PqModule module.PluginConstruct = func() module.Plugin {
+		return module.Plugin{
 			Constructs: []interface{}{
 				component.NewRunner,
 				factory.NewComponent,

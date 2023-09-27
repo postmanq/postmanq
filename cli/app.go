@@ -49,9 +49,9 @@ func (a *App) Run(invoker interface{}) {
 			log.Fatal(err)
 		}
 
-		descriptorConstruct, ok := symbol.(*module.DescriptorConstruct)
+		descriptorConstruct, ok := symbol.(*module.PluginConstruct)
 		if !ok {
-			log.Fatal(fmt.Errorf("can`t cast symbol=%T to module.DescriptorConstruct in mudule %s", symbol, moduleName))
+			log.Fatal(fmt.Errorf("can`t cast symbol=%T to module.PluginConstruct in mudule %s", symbol, moduleName))
 		}
 
 		descriptor := (*descriptorConstruct)()
