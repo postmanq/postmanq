@@ -13,7 +13,7 @@ func File(name string) Option {
 }
 
 type ProviderFactory interface {
-	CreateFromMap(map[string]string) (Provider, error)
+	Create(options ...Option) (Provider, error)
 }
 
 type Provider interface {

@@ -26,9 +26,9 @@ type ConfigProviderSuite struct {
 
 func (s *ConfigProviderSuite) TestPopulate() {
 	factory := services.NewConfigProviderFactory()
-	provider, err := factory.CreateFromMap(map[string]string{
+	provider, err := factory.Create(config.Static(map[string]string{
 		"b": "hello",
-	})
+	}))
 	s.Nil(err)
 
 	var a A

@@ -24,7 +24,7 @@ type ComponentFactorySuite struct {
 
 func (s *ComponentFactorySuite) SetupTest() {
 	configProviderFactory := new(service2.ConfigProviderFactory)
-	configProviderFactory.On("CreateFromMap", mock.Anything).Return(new(service2.ConfigProvider), nil)
+	configProviderFactory.On("Create", mock.Anything).Return(new(service2.ConfigProvider), nil)
 	s.factory = factory.NewComponent(configProviderFactory)
 	s.validDescriptor = module.ComponentDescriptor{
 		Name: "component1",
