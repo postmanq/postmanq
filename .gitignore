@@ -3,3 +3,4 @@
 out
 vendor
 config.yml
+test.go

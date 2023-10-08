@@ -9,16 +9,26 @@ import (
 )
 
 var (
-	Constructors = fx.Provide(
-		NewFxAppLogger,
+	Module = fx.Module(
+		"log",
+		fx.Provide(
+			NewFxAppLogger,
+		),
 	)
 )
 
-func NewFxAppLogger(cfg *config.Config) (log.Logger, error) {
+func NewFxAppLogger(provider config.Provider) (log.Logger, error) {
+	cfg := new(log.Config)
+	err := provider.Populate(cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	logger, err := services.NewLogger(cfg.Logger)
 	if err != nil {
 		return nil, err
 	}
+
 	logger.Debugf("app start cpu: %d", runtime.NumCPU())
 	return logger, nil
 }

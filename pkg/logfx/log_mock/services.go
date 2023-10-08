@@ -10,9 +10,9 @@ package mock_log
 
 import (
 	context "context"
+	"github.com/postmanq/postmanq/pkg/logfx/log"
 	reflect "reflect"
 
-	log "github.com/postmanq/postmanq/pkg/logfx/log"
 	gomock "go.uber.org/mock/gomock"
 )
 

@@ -10,9 +10,9 @@ package mock_application
 
 import (
 	context "context"
+	"github.com/postmanq/postmanq/pkg/applicationfx/application"
 	reflect "reflect"
 
-	application "github.com/postmanq/postmanq/pkg/applicationfx/application"
 	rxgo "github.com/reactivex/rxgo/v2"
 	gomock "go.uber.org/mock/gomock"
 )

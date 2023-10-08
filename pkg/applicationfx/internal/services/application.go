@@ -13,7 +13,7 @@ import (
 	"plugin"
 )
 
-func NewFxApplication() application.Application {
+func New() application.Application {
 	return &app{}
 }
 
@@ -40,7 +40,7 @@ func (a *app) Run(invoker interface{}) {
 		log.Fatal(err)
 	}
 
-	var constructs []interface{}
+	var modules []interface{}
 	for _, file := range files {
 		moduleName := fmt.Sprintf("%s/%s.so", args.ModuleDir, file.Name())
 		plug, err := plugin.Open(moduleName)
@@ -48,21 +48,20 @@ func (a *app) Run(invoker interface{}) {
 			log.Fatal(err)
 		}
 
-		symbol, err := plug.Lookup(application.ConstructName)
+		symbol, err := plug.Lookup(application.ModuleSymName)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		_, ok := symbol.(*application.PluginConstruct)
+		module, ok := symbol.(*fx.Option)
 		if !ok {
 			log.Fatal(fmt.Errorf("can`t cast symbol=%T to module.PluginConstruct in mudule %s", symbol, moduleName))
 		}
 
-		//descriptor := (*descriptorConstruct)()
-		//constructs = append(constructs, descriptor.Constructs...)
+		modules = append(modules, *module)
 	}
 
-	ctx := context.Background()
+	ctx, _ := context.WithCancel(context.Background())
 	fxApp := fx.New(
 		fx.Provide(func() application.Arguments {
 			return args
@@ -70,15 +69,9 @@ func (a *app) Run(invoker interface{}) {
 		fx.Provide(func() context.Context {
 			return ctx
 		}),
-		fx.Provide(constructs...),
+		fx.Provide(modules...),
 		fx.Invoke(invoker),
 	)
 
-	if err := fxApp.Start(ctx); err != nil {
-		log.Fatal(err)
-	}
-
-	if err := fxApp.Stop(ctx); err != nil {
-		log.Fatal(err)
-	}
+	fxApp.Run()
 }

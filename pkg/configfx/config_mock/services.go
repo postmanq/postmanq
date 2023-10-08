@@ -9,9 +9,9 @@
 package mock_config
 
 import (
+	"github.com/postmanq/postmanq/pkg/configfx/config"
 	reflect "reflect"
 
-	config "github.com/postmanq/postmanq/pkg/configfx/config"
 	gomock "go.uber.org/mock/gomock"
 )
 
