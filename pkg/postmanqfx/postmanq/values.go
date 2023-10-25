@@ -23,9 +23,10 @@ type Params struct {
 }
 
 type PluginDescriptor struct {
-	Name      string
-	Kind      PluginKind
-	Construct PluginConstruct
+	Name       string
+	Kind       PluginKind
+	Construct  PluginConstruct
+	MinVersion float32
 }
 
 type PluginKind int

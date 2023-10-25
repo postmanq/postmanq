@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package postmanqv1;
+
+option go_package = "./postmanqv1";
+
+import "patch/go.proto";
+
+enum WorkflowType {
+	WORKFLOW_TYPE_UNSPECIFIED = 0 [
+		(go.value) = {
+			name: "WorkflowTypeUnspecified"
+		}
+	];
+	WORKFLOW_TYPE_SEND_EVENT = 1 [
+		(go.value) = {
+			name: "WorkflowTypeSendEvent"
+		}
+	];
+}

@@ -2,18 +2,23 @@ package internal
 
 import (
 	"context"
+	"github.com/golang/protobuf/proto"
 	"github.com/postmanq/postmanq/pkg/configfx/config"
+	"github.com/postmanq/postmanq/pkg/gen/postmanqv1"
 	"github.com/postmanq/postmanq/pkg/plugins/rabbitmqfx/rabbitmq"
 	"github.com/postmanq/postmanq/pkg/postmanqfx/postmanq"
+	"github.com/postmanq/postmanq/pkg/temporalfx/temporal"
 	amqp "github.com/rabbitmq/amqp091-go"
-	"github.com/reactivex/rxgo/v2"
 )
 
-func NewFxPluginDescriptor() postmanq.Result {
+func NewFxPluginDescriptor(
+	executor temporal.WorkflowExecutor[*postmanqv1.Event, *postmanqv1.Event],
+) postmanq.Result {
 	return postmanq.Result{
 		Descriptor: postmanq.PluginDescriptor{
-			Name: "rabbitmq",
-			Kind: postmanq.PluginKindReceiver,
+			Name:       "rabbitmq",
+			Kind:       postmanq.PluginKindReceiver,
+			MinVersion: 1.0,
 			Construct: func(provider config.Provider) (postmanq.Plugin, error) {
 				var cfg rabbitmq.Config
 				err := provider.Populate(&cfg)
@@ -27,8 +32,9 @@ func NewFxPluginDescriptor() postmanq.Result {
 				}
 
 				return &plugin{
-					cfg:  cfg,
-					conn: conn,
+					cfg:      cfg,
+					conn:     conn,
+					executor: executor,
 				}, nil
 			},
 		},
@@ -36,11 +42,12 @@ func NewFxPluginDescriptor() postmanq.Result {
 }
 
 type plugin struct {
-	cfg  rabbitmq.Config
-	conn *amqp.Connection
+	cfg      rabbitmq.Config
+	conn     *amqp.Connection
+	executor temporal.WorkflowExecutor[*postmanqv1.Event, *postmanqv1.Event]
 }
 
-func (p plugin) OnReceive(ctx context.Context, next chan<- rxgo.Item) error {
+func (p plugin) Receive(ctx context.Context) error {
 	ch, err := p.conn.Channel()
 	if err != nil {
 		return err
@@ -63,13 +70,23 @@ func (p plugin) OnReceive(ctx context.Context, next chan<- rxgo.Item) error {
 	for {
 		select {
 		case delivery := <-deliveries:
-			next <- rxgo.Of(delivery)
+			_, err := p.executor.Execute(ctx, nil)
+			if err != nil {
+				return err
+			}
+
+			var event postmanqv1.Event
+			err = proto.Unmarshal(delivery.Body, &event)
+			if err != nil {
+				return err
+			}
+
+			_, err = p.executor.Execute(ctx, &event)
+			if err != nil {
+				return err
+			}
 		case <-ctx.Done():
 			break
 		}
 	}
-}
-
-func (p plugin) OnSend(ctx context.Context, item rxgo.Item) error {
-	panic("implement me")
 }

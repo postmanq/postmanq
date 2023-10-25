@@ -1,0 +1,21 @@
+version: v1
+plugins:
+- name: go-patch
+  out: pkg/gen
+  opt:
+    - plugin=go
+- name: go-patch
+  out: pkg/gen
+  opt:
+    - plugin=go-grpc
+    - require_unimplemented_servers=false
+- name: grpc-gateway
+  out: pkg/gen
+- name: openapiv2
+  out: api/openapi-spec
+  opt:
+    - output_format=yaml
+    - allow_merge=true
+    - merge_file_name=api
+    - json_names_for_fields=false
+    - openapi_naming_strategy=simple

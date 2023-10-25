@@ -3,7 +3,6 @@ package postmanq
 import (
 	"context"
 	"github.com/postmanq/postmanq/pkg/configfx/config"
-	"github.com/reactivex/rxgo/v2"
 )
 
 type Postmanq interface {
@@ -11,7 +10,19 @@ type Postmanq interface {
 
 type PluginConstruct func(provider config.Provider) (Plugin, error)
 
-type Plugin interface {
-	OnReceive(ctx context.Context, next chan<- rxgo.Item) error
-	OnSend(ctx context.Context, item rxgo.Item) error
+type Plugin interface{}
+
+type ReceiverPlugin interface {
+	Plugin
+	Receive(ctx context.Context) error
+}
+
+type MiddlewarePlugin interface {
+	Plugin
+	Next(ctx context.Context, event *Event) error
+}
+
+type SenderPlugin interface {
+	Plugin
+	Send(ctx context.Context, event *Event) error
 }
