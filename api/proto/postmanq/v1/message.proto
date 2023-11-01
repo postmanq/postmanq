@@ -6,4 +6,5 @@ option go_package = "./postmanqv1";
 
 message Event {
 	string uuid = 1;
+	uint32 attempts_count = 2;
 }

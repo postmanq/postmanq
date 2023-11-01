@@ -2,10 +2,11 @@ package services
 
 import (
 	"context"
+	"github.com/postmanq/postmanq/pkg/collection"
 	"github.com/postmanq/postmanq/pkg/configfx/config"
 	"github.com/postmanq/postmanq/pkg/logfx/log"
 	"github.com/postmanq/postmanq/pkg/postmanqfx/postmanq"
-	"github.com/reactivex/rxgo/v2"
+	"github.com/postmanq/postmanq/pkg/temporalfx/temporal"
 )
 
 type invoker struct {
@@ -14,15 +15,17 @@ type invoker struct {
 	logger            log.Logger
 	providerFactory   config.ProviderFactory
 	pluginDescriptors []postmanq.PluginDescriptor
-	Pipelines         map[string]*postmanq.Pipeline
+	workerFactory     temporal.WorkerFactory
+	pipelines         map[string]*postmanq.Pipeline
 }
 
 func (i invoker) Configure() error {
 	for _, pipelineCfg := range i.config.Pipelines {
 		pipeline := &postmanq.Pipeline{
-			Receivers:   make([]postmanq.Plugin, 0),
-			Middlewares: make([]postmanq.Plugin, 0),
-			Senders:     make([]postmanq.Plugin, 0),
+			Name:        pipelineCfg.Name,
+			Receivers:   collection.NewSlice[postmanq.ReceiverPlugin](),
+			Middlewares: collection.NewSlice[postmanq.WorkflowPlugin](),
+			Senders:     collection.NewSlice[postmanq.WorkflowPlugin](),
 		}
 
 		for _, pluginCfg := range pipelineCfg.Plugins {
@@ -43,54 +46,46 @@ func (i invoker) Configure() error {
 
 				switch {
 				case descriptor.Kind&postmanq.PluginKindReceiver == postmanq.PluginKindReceiver:
-					pipeline.Receivers = append(pipeline.Receivers, plugin)
+					pipeline.Receivers.Add(plugin.(postmanq.ReceiverPlugin))
 				case descriptor.Kind&postmanq.PluginKindMiddleware == postmanq.PluginKindMiddleware:
-					pipeline.Middlewares = append(pipeline.Middlewares, plugin)
+					pipeline.Middlewares.Add(plugin.(postmanq.WorkflowPlugin))
 				case descriptor.Kind&postmanq.PluginKindSender == postmanq.PluginKindSender:
-					pipeline.Senders = append(pipeline.Senders, plugin)
+					pipeline.Senders.Add(plugin.(postmanq.WorkflowPlugin))
 				}
 			}
 		}
 
-		i.Pipelines[pipelineCfg.Name] = pipeline
+		i.pipelines[pipelineCfg.Name] = pipeline
 	}
 	return nil
 }
 
 func (i invoker) Run(ctx context.Context) error {
-	for _, pipeline := range i.Pipelines {
+	for _, pipeline := range i.pipelines {
 		childCtx, cancel := context.WithCancel(ctx)
-		opts := []rxgo.Option{
-			rxgo.WithContext(childCtx),
-			rxgo.WithPool(i.config.PoolSize),
-		}
-
-		producers := make([]rxgo.Producer, len(pipeline.Receivers))
-		for y, receiver := range pipeline.Receivers {
-			producers[y] = func(ctx context.Context, next chan<- rxgo.Item) {
-				err := receiver.OnReceive(ctx, next)
+		for _, plugin := range pipeline.Receivers.Entries() {
+			go func(ctx context.Context, cancel context.CancelFunc, plugin postmanq.ReceiverPlugin) {
+				err := plugin.Receive(ctx)
 				if err != nil {
-					next <- rxgo.Error(err)
+					i.logger.Error(err)
+					cancel()
 				}
-			}
+			}(childCtx, cancel, plugin)
 		}
 
-		nextObservable := rxgo.FromEventSource(rxgo.Defer(producers, opts...).Observe(), opts...)
-		nextObservable.DoOnError(func(err error) {
+		worker, err := i.workerFactory.CreateByDescriptor(ctx, temporal.WorkerDescriptor{
+			Workflow:   nil,
+			Activities: nil,
+		})
+		if err != nil {
 			i.logger.Error(err)
 			cancel()
-		})
-		if len(pipeline.Middlewares) > 0 {
-
 		}
 
-		for _, sender := range pipeline.Senders {
-			nextObservable.DoOnNext(func(i interface{}) {
-				err := sender.OnSend(childCtx, rxgo.Of(i))
-				if err != nil {
-
-				}
-			})
+		err = worker.Run(temporal.InterruptCh())
+		if err != nil {
+			i.logger.Error(err)
+			cancel()
 		}
 	}
 	<-ctx.Done()

@@ -1,4 +1,4 @@
-package temporal
+package internal
 
 import (
 	"context"
@@ -55,13 +55,18 @@ func (w workerFactory) Create(ctx context.Context, workflowType temporal.Workflo
 		return nil, temporal.ErrWorkflowNotFound
 	}
 
+	return w.CreateByDescriptor(ctx, descriptor)
+}
+
+func (w workerFactory) CreateByDescriptor(ctx context.Context, workerDescriptor temporal.WorkerDescriptor) (temporal.Worker, error) {
+	workflowType := workerDescriptor.Workflow.GetWorkflowType()
 	wrk := &worker{
 		Worker: sdkworker.New(w.client, string(workflowType), sdkworker.Options{
 			Identity: fmt.Sprintf("%s.%s", workflowType, uuid.NewString()),
 		}),
 	}
-	wrk.RegisterWorkflowWithType(descriptor.Workflow.GetWorkflowType(), descriptor.Workflow)
-	for _, activityDescriptor := range descriptor.Activities {
+	wrk.RegisterWorkflowWithType(workflowType, workerDescriptor.Workflow)
+	for _, activityDescriptor := range workerDescriptor.Activities {
 		wrk.RegisterActivityWithType(activityDescriptor.GetActivityType(), activityDescriptor)
 	}
 

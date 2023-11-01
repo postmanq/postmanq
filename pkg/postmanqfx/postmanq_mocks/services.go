@@ -12,9 +12,35 @@ import (
 	context "context"
 	reflect "reflect"
 
-	rxgo "github.com/reactivex/rxgo/v2"
+	postmanqv1 "github.com/postmanq/postmanq/pkg/gen/postmanqv1"
+	postmanq "github.com/postmanq/postmanq/pkg/postmanqfx/postmanq"
+	temporal "github.com/postmanq/postmanq/pkg/temporalfx/temporal"
+	workflow "go.temporal.io/sdk/workflow"
 	gomock "go.uber.org/mock/gomock"
 )
+
+// MockPostmanq is a mock of Postmanq interface.
+type MockPostmanq struct {
+	ctrl     *gomock.Controller
+	recorder *MockPostmanqMockRecorder
+}
+
+// MockPostmanqMockRecorder is the mock recorder for MockPostmanq.
+type MockPostmanqMockRecorder struct {
+	mock *MockPostmanq
+}
+
+// NewMockPostmanq creates a new mock instance.
+func NewMockPostmanq(ctrl *gomock.Controller) *MockPostmanq {
+	mock := &MockPostmanq{ctrl: ctrl}
+	mock.recorder = &MockPostmanqMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockPostmanq) EXPECT() *MockPostmanqMockRecorder {
+	return m.recorder
+}
 
 // MockPlugin is a mock of Plugin interface.
 type MockPlugin struct {
@@ -39,30 +65,150 @@ func (m *MockPlugin) EXPECT() *MockPluginMockRecorder {
 	return m.recorder
 }
 
-// OnReceive mocks base method.
-func (m *MockPlugin) OnReceive(ctx context.Context, next chan<- rxgo.Item) error {
+// MockReceiverPlugin is a mock of ReceiverPlugin interface.
+type MockReceiverPlugin struct {
+	ctrl     *gomock.Controller
+	recorder *MockReceiverPluginMockRecorder
+}
+
+// MockReceiverPluginMockRecorder is the mock recorder for MockReceiverPlugin.
+type MockReceiverPluginMockRecorder struct {
+	mock *MockReceiverPlugin
+}
+
+// NewMockReceiverPlugin creates a new mock instance.
+func NewMockReceiverPlugin(ctrl *gomock.Controller) *MockReceiverPlugin {
+	mock := &MockReceiverPlugin{ctrl: ctrl}
+	mock.recorder = &MockReceiverPluginMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockReceiverPlugin) EXPECT() *MockReceiverPluginMockRecorder {
+	return m.recorder
+}
+
+// Receive mocks base method.
+func (m *MockReceiverPlugin) Receive(ctx context.Context) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "OnReceive", ctx, next)
+	ret := m.ctrl.Call(m, "Receive", ctx)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// OnReceive indicates an expected call of OnReceive.
-func (mr *MockPluginMockRecorder) OnReceive(ctx, next any) *gomock.Call {
+// Receive indicates an expected call of Receive.
+func (mr *MockReceiverPluginMockRecorder) Receive(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnReceive", reflect.TypeOf((*MockPlugin)(nil).OnReceive), ctx, next)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Receive", reflect.TypeOf((*MockReceiverPlugin)(nil).Receive), ctx)
 }
 
-// OnSend mocks base method.
-func (m *MockPlugin) OnSend(ctx context.Context, item rxgo.Item) error {
+// MockWorkflowPlugin is a mock of WorkflowPlugin interface.
+type MockWorkflowPlugin struct {
+	ctrl     *gomock.Controller
+	recorder *MockWorkflowPluginMockRecorder
+}
+
+// MockWorkflowPluginMockRecorder is the mock recorder for MockWorkflowPlugin.
+type MockWorkflowPluginMockRecorder struct {
+	mock *MockWorkflowPlugin
+}
+
+// NewMockWorkflowPlugin creates a new mock instance.
+func NewMockWorkflowPlugin(ctrl *gomock.Controller) *MockWorkflowPlugin {
+	mock := &MockWorkflowPlugin{ctrl: ctrl}
+	mock.recorder = &MockWorkflowPluginMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockWorkflowPlugin) EXPECT() *MockWorkflowPluginMockRecorder {
+	return m.recorder
+}
+
+// GetActivityDescriptor mocks base method.
+func (m *MockWorkflowPlugin) GetActivityDescriptor() temporal.ActivityDescriptor {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "OnSend", ctx, item)
+	ret := m.ctrl.Call(m, "GetActivityDescriptor")
+	ret0, _ := ret[0].(temporal.ActivityDescriptor)
+	return ret0
+}
+
+// GetActivityDescriptor indicates an expected call of GetActivityDescriptor.
+func (mr *MockWorkflowPluginMockRecorder) GetActivityDescriptor() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActivityDescriptor", reflect.TypeOf((*MockWorkflowPlugin)(nil).GetActivityDescriptor))
+}
+
+// MockEventSenderFactory is a mock of EventSenderFactory interface.
+type MockEventSenderFactory struct {
+	ctrl     *gomock.Controller
+	recorder *MockEventSenderFactoryMockRecorder
+}
+
+// MockEventSenderFactoryMockRecorder is the mock recorder for MockEventSenderFactory.
+type MockEventSenderFactoryMockRecorder struct {
+	mock *MockEventSenderFactory
+}
+
+// NewMockEventSenderFactory creates a new mock instance.
+func NewMockEventSenderFactory(ctrl *gomock.Controller) *MockEventSenderFactory {
+	mock := &MockEventSenderFactory{ctrl: ctrl}
+	mock.recorder = &MockEventSenderFactoryMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockEventSenderFactory) EXPECT() *MockEventSenderFactoryMockRecorder {
+	return m.recorder
+}
+
+// Create mocks base method.
+func (m *MockEventSenderFactory) Create(pipeline postmanq.Pipeline) postmanq.EventSender {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", pipeline)
+	ret0, _ := ret[0].(postmanq.EventSender)
+	return ret0
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockEventSenderFactoryMockRecorder) Create(pipeline any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockEventSenderFactory)(nil).Create), pipeline)
+}
+
+// MockEventSender is a mock of EventSender interface.
+type MockEventSender struct {
+	ctrl     *gomock.Controller
+	recorder *MockEventSenderMockRecorder
+}
+
+// MockEventSenderMockRecorder is the mock recorder for MockEventSender.
+type MockEventSenderMockRecorder struct {
+	mock *MockEventSender
+}
+
+// NewMockEventSender creates a new mock instance.
+func NewMockEventSender(ctrl *gomock.Controller) *MockEventSender {
+	mock := &MockEventSender{ctrl: ctrl}
+	mock.recorder = &MockEventSenderMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockEventSender) EXPECT() *MockEventSenderMockRecorder {
+	return m.recorder
+}
+
+// SendEvent mocks base method.
+func (m *MockEventSender) SendEvent(ctx workflow.Context, event *postmanqv1.Event) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SendEvent", ctx, event)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// OnSend indicates an expected call of OnSend.
-func (mr *MockPluginMockRecorder) OnSend(ctx, item any) *gomock.Call {
+// SendEvent indicates an expected call of SendEvent.
+func (mr *MockEventSenderMockRecorder) SendEvent(ctx, event any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnSend", reflect.TypeOf((*MockPlugin)(nil).OnSend), ctx, item)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendEvent", reflect.TypeOf((*MockEventSender)(nil).SendEvent), ctx, event)
 }

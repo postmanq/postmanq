@@ -1,16 +1,19 @@
-package postmanqfx
+package temporalfx
 
 import (
-	temporal "github.com/postmanq/postmanq/pkg/temporalfx/internal"
+	"github.com/postmanq/postmanq/pkg/gen/postmanqv1"
+	"github.com/postmanq/postmanq/pkg/temporalfx/internal"
 	"go.uber.org/fx"
 )
 
 var (
 	Module = fx.Module(
-		"postmanq",
+		"temporal",
 		fx.Provide(
-			temporal.NewFxClient,
-			temporal.NewFxWorkerFactory,
+			internal.NewFxClient,
+			internal.NewFxWorkerFactory,
+			internal.NewFxWorkflowExecutorFactory[*postmanqv1.Event, *postmanqv1.Event],
+			internal.NewFxActivityExecutorFactory[*postmanqv1.Event, *postmanqv1.Event],
 		),
 	)
 )

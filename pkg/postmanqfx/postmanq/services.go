@@ -3,6 +3,9 @@ package postmanq
 import (
 	"context"
 	"github.com/postmanq/postmanq/pkg/configfx/config"
+	"github.com/postmanq/postmanq/pkg/gen/postmanqv1"
+	"github.com/postmanq/postmanq/pkg/temporalfx/temporal"
+	"go.temporal.io/sdk/workflow"
 )
 
 type Postmanq interface {
@@ -17,12 +20,15 @@ type ReceiverPlugin interface {
 	Receive(ctx context.Context) error
 }
 
-type MiddlewarePlugin interface {
+type WorkflowPlugin interface {
 	Plugin
-	Next(ctx context.Context, event *Event) error
+	GetActivityDescriptor() temporal.ActivityDescriptor
 }
 
-type SenderPlugin interface {
-	Plugin
-	Send(ctx context.Context, event *Event) error
+type EventSenderFactory interface {
+	Create(pipeline Pipeline) EventSender
+}
+
+type EventSender interface {
+	SendEvent(ctx workflow.Context, event *postmanqv1.Event) error
 }

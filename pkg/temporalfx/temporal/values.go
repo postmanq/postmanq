@@ -39,6 +39,11 @@ type WorkerFactoryIn struct {
 
 type WorkflowType string
 
+const (
+	WorkflowTypeUndefined WorkflowType = ""
+	WorkflowTypeSendEvent WorkflowType = "SendEvent"
+)
+
 type ChildWorkflowOptions = workflow.ChildWorkflowOptions
 
 type StartWorkflowOptions struct {

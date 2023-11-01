@@ -2,6 +2,8 @@ package postmanqfx
 
 import (
 	"github.com/postmanq/postmanq/pkg/configfx/config"
+	"github.com/postmanq/postmanq/pkg/postmanqfx/internal/services"
+	"github.com/postmanq/postmanq/pkg/postmanqfx/internal/workflows"
 	"github.com/postmanq/postmanq/pkg/postmanqfx/postmanq"
 	"go.uber.org/fx"
 )
@@ -11,6 +13,8 @@ var (
 		"postmanq",
 		fx.Provide(
 			NewFxConfig,
+			services.NewFxEventSenderFactory,
+			workflows.NewFxSendEventWorkflow,
 		),
 	)
 )

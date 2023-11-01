@@ -1,4 +1,4 @@
-package temporal
+package internal
 
 import (
 	"github.com/postmanq/postmanq/pkg/configfx/config"

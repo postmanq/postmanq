@@ -15,6 +15,7 @@ type Client client.Client
 
 type WorkerFactory interface {
 	Create(ctx context.Context, workflowType WorkflowType) (Worker, error)
+	CreateByDescriptor(ctx context.Context, workerDescriptor WorkerDescriptor) (Worker, error)
 }
 
 type Worker interface {
@@ -194,8 +195,14 @@ func (w withStartSignal) Apply(o *WorkflowSettings) {
 	o.StartSignal = Signal(w)
 }
 
-func WithStartSignal(channel string) WorkflowOption {
-	return withStartSignal(Signal{Channel: channel})
+type withStartDelay time.Duration
+
+func (w withStartDelay) Apply(o *WorkflowSettings) {
+	o.StartWorkflowOptions.StartDelay = time.Duration(w)
+}
+
+func WithStartDelay(duration time.Duration) WorkflowOption {
+	return withStartDelay(duration)
 }
 
 type ActivityDescriptor interface {
@@ -212,6 +219,10 @@ type WorkflowExecutorFactory[I any, O any] interface {
 
 type WorkflowExecutor[I any, O any] interface {
 	Execute(ctx context.Context, in I) (*O, error)
+}
+
+type ActivityExecutorFactory[I any, O any] interface {
+	Create(activityType string) ActivityExecutor[I, O]
 }
 
 type ActivityExecutor[I any, O any] interface {

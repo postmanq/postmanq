@@ -1,4 +1,4 @@
-package temporal
+package internal
 
 import (
 	"context"
@@ -50,8 +50,16 @@ func (e *workflowExecutor[I, O]) Execute(ctx context.Context, in I) (*O, error) 
 	return &out, nil
 }
 
-func NewActivityExecutor[I any, O any]() temporal.ActivityExecutor[I, O] {
-	return &activityExecutor[I, O]{}
+func NewFxActivityExecutorFactory[I any, O any]() temporal.ActivityExecutorFactory[I, O] {
+	return &activityExecutorFactory[I, O]{}
+}
+
+type activityExecutorFactory[I any, O any] struct{}
+
+func (a activityExecutorFactory[I, O]) Create(activityType string) temporal.ActivityExecutor[I, O] {
+	return &activityExecutor[I, O]{
+		activityType: activityType,
+	}
 }
 
 type activityExecutor[I any, O any] struct {
