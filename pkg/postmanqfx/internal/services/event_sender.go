@@ -8,10 +8,19 @@ import (
 	"github.com/postmanq/postmanq/pkg/postmanqfx/postmanq"
 	"github.com/postmanq/postmanq/pkg/temporalfx/temporal"
 	"go.temporal.io/sdk/workflow"
+	"go.uber.org/fx"
 	"time"
 )
 
-func NewFxEventSenderFactory(params postmanq.EventSenderFactoryParams) postmanq.EventSenderFactory {
+type EventSenderFactoryParams struct {
+	fx.In
+	Ctx                     context.Context
+	Logger                  log.Logger
+	WorkflowExecutorFactory temporal.WorkflowExecutorFactory[*postmanqv1.Event, *postmanqv1.Event]
+	ActivityExecutorFactory temporal.ActivityExecutorFactory[*postmanqv1.Event, *postmanqv1.Event]
+}
+
+func NewFxEventSenderFactory(params EventSenderFactoryParams) postmanq.EventSenderFactory {
 	return &eventSenderFactory{
 		ctx:                     params.Ctx,
 		logger:                  params.Logger,
@@ -27,7 +36,7 @@ type eventSenderFactory struct {
 	activityExecutorFactory temporal.ActivityExecutorFactory[*postmanqv1.Event, *postmanqv1.Event]
 }
 
-func (f *eventSenderFactory) Create(pipeline postmanq.Pipeline) postmanq.EventSender {
+func (f *eventSenderFactory) Create(pipeline *postmanq.Pipeline) postmanq.EventSender {
 	return &eventSender{
 		ctx:                     f.ctx,
 		logger:                  f.logger,
@@ -42,7 +51,7 @@ type eventSender struct {
 	logger                  log.Logger
 	workflowExecutorFactory temporal.WorkflowExecutorFactory[*postmanqv1.Event, *postmanqv1.Event]
 	activityExecutorFactory temporal.ActivityExecutorFactory[*postmanqv1.Event, *postmanqv1.Event]
-	pipeline                postmanq.Pipeline
+	pipeline                *postmanq.Pipeline
 }
 
 func (s *eventSender) SendEvent(ctx workflow.Context, event *postmanqv1.Event) error {

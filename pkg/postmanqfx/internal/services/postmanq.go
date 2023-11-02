@@ -4,19 +4,51 @@ import (
 	"context"
 	"github.com/postmanq/postmanq/pkg/collection"
 	"github.com/postmanq/postmanq/pkg/configfx/config"
+	"github.com/postmanq/postmanq/pkg/gen/postmanqv1"
 	"github.com/postmanq/postmanq/pkg/logfx/log"
 	"github.com/postmanq/postmanq/pkg/postmanqfx/postmanq"
 	"github.com/postmanq/postmanq/pkg/temporalfx/temporal"
+	"go.temporal.io/sdk/workflow"
+	"go.uber.org/fx"
 )
 
+type InvokerParams struct {
+	fx.In
+	Config             *postmanq.Config
+	Logger             log.Logger
+	ProviderFactory    config.ProviderFactory
+	Provider           config.Provider
+	PluginDescriptors  []postmanq.PluginDescriptor
+	WorkerFactory      temporal.WorkerFactory
+	EventSenderFactory postmanq.EventSenderFactory
+}
+
+func NewFxInvoker(params InvokerParams) (postmanq.Invoker, error) {
+	cfg := new(postmanq.Config)
+	err := params.Provider.Populate(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &invoker{
+		config:             params.Config,
+		logger:             params.Logger,
+		providerFactory:    params.ProviderFactory,
+		pluginDescriptors:  params.PluginDescriptors,
+		workerFactory:      params.WorkerFactory,
+		eventSenderFactory: params.EventSenderFactory,
+		pipelines:          collection.NewMap[string, *postmanq.Pipeline](),
+	}, nil
+}
+
 type invoker struct {
-	ctx               context.Context
-	config            *postmanq.Config
-	logger            log.Logger
-	providerFactory   config.ProviderFactory
-	pluginDescriptors []postmanq.PluginDescriptor
-	workerFactory     temporal.WorkerFactory
-	pipelines         map[string]*postmanq.Pipeline
+	config             *postmanq.Config
+	logger             log.Logger
+	providerFactory    config.ProviderFactory
+	pluginDescriptors  []postmanq.PluginDescriptor
+	workerFactory      temporal.WorkerFactory
+	eventSenderFactory postmanq.EventSenderFactory
+	pipelines          collection.Map[string, *postmanq.Pipeline]
 }
 
 func (i invoker) Configure() error {
@@ -55,13 +87,13 @@ func (i invoker) Configure() error {
 			}
 		}
 
-		i.pipelines[pipelineCfg.Name] = pipeline
+		i.pipelines.Set(pipelineCfg.Name, pipeline)
 	}
 	return nil
 }
 
 func (i invoker) Run(ctx context.Context) error {
-	for _, pipeline := range i.pipelines {
+	for _, pipeline := range i.pipelines.Entries() {
 		childCtx, cancel := context.WithCancel(ctx)
 		for _, plugin := range pipeline.Receivers.Entries() {
 			go func(ctx context.Context, cancel context.CancelFunc, plugin postmanq.ReceiverPlugin) {
@@ -73,9 +105,20 @@ func (i invoker) Run(ctx context.Context) error {
 			}(childCtx, cancel, plugin)
 		}
 
+		workflowPlugins := collection.NewSlice[postmanq.WorkflowPlugin]()
+		workflowPlugins.Add(pipeline.Middlewares.Entries()...)
+		workflowPlugins.Add(pipeline.Senders.Entries()...)
+		activityDescriptors := collection.NewSlice[temporal.ActivityDescriptor]()
+		for _, plugin := range workflowPlugins.Entries() {
+			activityDescriptors.Add(plugin.GetActivityDescriptor())
+		}
+
+		sender := i.eventSenderFactory.Create(pipeline)
 		worker, err := i.workerFactory.CreateByDescriptor(ctx, temporal.WorkerDescriptor{
-			Workflow:   nil,
-			Activities: nil,
+			Workflow: postmanq.SendEventWorkflow(func(ctx workflow.Context, event *postmanqv1.Event) error {
+				return sender.SendEvent(ctx, event)
+			}),
+			Activities: activityDescriptors.Entries(),
 		})
 		if err != nil {
 			i.logger.Error(err)
@@ -88,6 +131,6 @@ func (i invoker) Run(ctx context.Context) error {
 			cancel()
 		}
 	}
-	<-ctx.Done()
+
 	return nil
 }

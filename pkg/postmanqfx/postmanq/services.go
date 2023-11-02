@@ -8,9 +8,6 @@ import (
 	"go.temporal.io/sdk/workflow"
 )
 
-type Postmanq interface {
-}
-
 type PluginConstruct func(provider config.Provider) (Plugin, error)
 
 type Plugin interface{}
@@ -26,9 +23,20 @@ type WorkflowPlugin interface {
 }
 
 type EventSenderFactory interface {
-	Create(pipeline Pipeline) EventSender
+	Create(pipeline *Pipeline) EventSender
 }
 
 type EventSender interface {
 	SendEvent(ctx workflow.Context, event *postmanqv1.Event) error
+}
+
+type SendEventWorkflow func(ctx workflow.Context, event *postmanqv1.Event) error
+
+func (w SendEventWorkflow) GetWorkflowType() temporal.WorkflowType {
+	return temporal.WorkflowTypeSendEvent
+}
+
+type Invoker interface {
+	Configure() error
+	Run(ctx context.Context) error
 }

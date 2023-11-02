@@ -2,11 +2,37 @@ swagger: "2.0"
 info:
   title: api/proto/postmanq/v1/enum.proto
   version: version not set
+tags:
+  - name: EventService
 consumes:
   - application/json
 produces:
   - application/json
-paths: {}
+paths:
+  /v1/event:
+    post:
+      operationId: EventService_ReceiveEvent
+      responses:
+        "200":
+          description: A successful response.
+          schema:
+            $ref: '#/definitions/Event'
+        default:
+          description: An unexpected error response.
+          schema:
+            $ref: '#/definitions/Status'
+      parameters:
+        - name: uuid
+          in: query
+          required: false
+          type: string
+        - name: attempts_count
+          in: query
+          required: false
+          type: integer
+          format: int64
+      tags:
+        - EventService
 definitions:
   Any:
     type: object
@@ -14,6 +40,14 @@ definitions:
       '@type':
         type: string
     additionalProperties: {}
+  Event:
+    type: object
+    properties:
+      uuid:
+        type: string
+      attempts_count:
+        type: integer
+        format: int64
   Status:
     type: object
     properties:

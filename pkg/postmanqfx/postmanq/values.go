@@ -4,9 +4,7 @@ import (
 	"context"
 	"github.com/postmanq/postmanq/pkg/collection"
 	"github.com/postmanq/postmanq/pkg/configfx/config"
-	"github.com/postmanq/postmanq/pkg/gen/postmanqv1"
 	"github.com/postmanq/postmanq/pkg/logfx/log"
-	"github.com/postmanq/postmanq/pkg/temporalfx/temporal"
 	"go.uber.org/fx"
 )
 
@@ -49,7 +47,6 @@ type Pipeline struct {
 }
 
 type Config struct {
-	PoolSize  int              `yaml:"pool_size"`
 	Pipelines []ConfigPipeline `yaml:"pipelines"`
 }
 
@@ -61,12 +58,4 @@ type ConfigPipeline struct {
 type ConfigPlugin struct {
 	Name   string      `yaml:"name"`
 	Config interface{} `yaml:"config"`
-}
-
-type EventSenderFactoryParams struct {
-	fx.In
-	Ctx                     context.Context
-	Logger                  log.Logger
-	WorkflowExecutorFactory temporal.WorkflowExecutorFactory[*postmanqv1.Event, *postmanqv1.Event]
-	ActivityExecutorFactory temporal.ActivityExecutorFactory[*postmanqv1.Event, *postmanqv1.Event]
 }

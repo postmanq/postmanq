@@ -19,29 +19,6 @@ import (
 	gomock "go.uber.org/mock/gomock"
 )
 
-// MockPostmanq is a mock of Postmanq interface.
-type MockPostmanq struct {
-	ctrl     *gomock.Controller
-	recorder *MockPostmanqMockRecorder
-}
-
-// MockPostmanqMockRecorder is the mock recorder for MockPostmanq.
-type MockPostmanqMockRecorder struct {
-	mock *MockPostmanq
-}
-
-// NewMockPostmanq creates a new mock instance.
-func NewMockPostmanq(ctrl *gomock.Controller) *MockPostmanq {
-	mock := &MockPostmanq{ctrl: ctrl}
-	mock.recorder = &MockPostmanqMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockPostmanq) EXPECT() *MockPostmanqMockRecorder {
-	return m.recorder
-}
-
 // MockPlugin is a mock of Plugin interface.
 type MockPlugin struct {
 	ctrl     *gomock.Controller
@@ -163,7 +140,7 @@ func (m *MockEventSenderFactory) EXPECT() *MockEventSenderFactoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockEventSenderFactory) Create(pipeline postmanq.Pipeline) postmanq.EventSender {
+func (m *MockEventSenderFactory) Create(pipeline *postmanq.Pipeline) postmanq.EventSender {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", pipeline)
 	ret0, _ := ret[0].(postmanq.EventSender)
@@ -211,4 +188,55 @@ func (m *MockEventSender) SendEvent(ctx workflow.Context, event *postmanqv1.Even
 func (mr *MockEventSenderMockRecorder) SendEvent(ctx, event any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendEvent", reflect.TypeOf((*MockEventSender)(nil).SendEvent), ctx, event)
+}
+
+// MockInvoker is a mock of Invoker interface.
+type MockInvoker struct {
+	ctrl     *gomock.Controller
+	recorder *MockInvokerMockRecorder
+}
+
+// MockInvokerMockRecorder is the mock recorder for MockInvoker.
+type MockInvokerMockRecorder struct {
+	mock *MockInvoker
+}
+
+// NewMockInvoker creates a new mock instance.
+func NewMockInvoker(ctrl *gomock.Controller) *MockInvoker {
+	mock := &MockInvoker{ctrl: ctrl}
+	mock.recorder = &MockInvokerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockInvoker) EXPECT() *MockInvokerMockRecorder {
+	return m.recorder
+}
+
+// Configure mocks base method.
+func (m *MockInvoker) Configure() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Configure")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Configure indicates an expected call of Configure.
+func (mr *MockInvokerMockRecorder) Configure() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Configure", reflect.TypeOf((*MockInvoker)(nil).Configure))
+}
+
+// Run mocks base method.
+func (m *MockInvoker) Run(ctx context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Run", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Run indicates an expected call of Run.
+func (mr *MockInvokerMockRecorder) Run(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Run", reflect.TypeOf((*MockInvoker)(nil).Run), ctx)
 }
