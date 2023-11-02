@@ -1,4 +1,4 @@
-package rabbitmqfx
+package main
 
 import (
 	"github.com/postmanq/postmanq/pkg/plugins/rabbitmqfx/internal"

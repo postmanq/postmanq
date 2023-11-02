@@ -11,7 +11,7 @@ DOCKER_PROJECT=postmanq
 DOCKER_COMPOSE=$(DOCKER_DIR)/docker-compose.yml
 DOCKER_COMPOSE_INFRA=$(DOCKER_DIR)/docker-compose.infra.yml
 
-PLUGINS=$(shell ls -d $(PLUGIN_DIR)/* | cut -d '/' -f 3)
+PLUGINS=$(shell ls -d $(PLUGIN_DIR)/*)
 
 GOCMD=go
 GOBUILD=$(GOCMD) build
@@ -51,7 +51,7 @@ build_postmanq:
 build_plugins:
 	rm -rf $(OUT_PLUGIN_DIR)
 	mkdir -p $(OUT_PLUGIN_DIR)
-	$(foreach PLUGIN, $(PLUGINS), $(GOBUILD) -buildmode=plugin -o $(OUT_PLUGIN_DIR)/$(PLUGIN).so $(PLUGIN_DIR)/$(PLUGIN)/plugin/main.go;)
+	$(foreach PLUGIN, $(PLUGINS), $(GOBUILD) -buildmode=plugin -o $(OUT_PLUGIN_DIR)/$(shell basename $(PLUGIN)).so $(PLUGIN_DIR)/$(shell basename $(PLUGIN))/module.go;)
 
 build: clean create-mocks test lint build-modules build-postmanq
 
