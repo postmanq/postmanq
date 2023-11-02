@@ -218,7 +218,7 @@ type WorkflowExecutorFactory[I any, O any] interface {
 }
 
 type WorkflowExecutor[I any, O any] interface {
-	Execute(ctx context.Context, in I) (*O, error)
+	Execute(ctx context.Context, in I) (O, error)
 }
 
 type ActivityExecutorFactory[I any, O any] interface {

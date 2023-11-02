@@ -28,7 +28,8 @@ type workflowExecutor[I any, O any] struct {
 	options []temporal.WorkflowOption
 }
 
-func (e *workflowExecutor[I, O]) Execute(ctx context.Context, in I) (*O, error) {
+func (e *workflowExecutor[I, O]) Execute(ctx context.Context, in I) (O, error) {
+	var out O
 	workflowOptions := temporal.NewStartWorkflowOptions(e.options...)
 
 	wr, err := e.cl.ExecuteWorkflow(
@@ -38,16 +39,15 @@ func (e *workflowExecutor[I, O]) Execute(ctx context.Context, in I) (*O, error) 
 		in,
 	)
 	if err != nil {
-		return nil, err
+		return out, err
 	}
 
-	var out O
 	err = wr.Get(ctx, &out)
 	if err != nil {
-		return nil, err
+		return out, err
 	}
 
-	return &out, nil
+	return out, nil
 }
 
 func NewFxActivityExecutorFactory[I any, O any]() temporal.ActivityExecutorFactory[I, O] {

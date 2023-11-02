@@ -7,10 +7,37 @@ import (
 	"github.com/postmanq/postmanq/pkg/logfx/log"
 	"github.com/postmanq/postmanq/pkg/plugins/serverfx/server"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"net"
 	"net/http"
 	"reflect"
 )
+
+func NewFxUnionServerFactory(logger log.Logger) server.Factory {
+	return &unionServerFactory{
+		logger: logger,
+	}
+}
+
+type unionServerFactory struct {
+	logger log.Logger
+}
+
+func (f *unionServerFactory) Create(ctx context.Context, cfg server.Config) (server.Server, error) {
+	srv := &unionServer{
+		ctx:        ctx,
+		cfg:        cfg,
+		logger:     f.logger,
+		grpcServer: grpc.NewServer(),
+		mux:        runtime.NewServeMux(),
+		opts: []grpc.DialOption{
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		},
+		errors: make(chan error, 1),
+	}
+
+	return srv, nil
+}
 
 type unionServer struct {
 	ctx           context.Context
