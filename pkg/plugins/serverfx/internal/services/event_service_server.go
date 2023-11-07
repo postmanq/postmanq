@@ -2,9 +2,9 @@ package services
 
 import (
 	"context"
-	"github.com/postmanq/postmanq/pkg/gen/postmanqv1"
-	"github.com/postmanq/postmanq/pkg/logfx/log"
-	"github.com/postmanq/postmanq/pkg/temporalfx/temporal"
+	"github.com/postmanq/postmanq/pkg/commonfx/gen/postmanqv1"
+	"github.com/postmanq/postmanq/pkg/commonfx/logfx/log"
+	"github.com/postmanq/postmanq/pkg/commonfx/temporalfx/temporal"
 	"go.uber.org/fx"
 	"time"
 )
@@ -15,7 +15,7 @@ type EventServiceServerParams struct {
 	WorkflowExecutorFactory temporal.WorkflowExecutorFactory[*postmanqv1.Event, *postmanqv1.Event]
 }
 
-func NewFxEventServiceServer(params *EventServiceServerParams) postmanqv1.EventServiceServer {
+func NewFxEventServiceServer(params EventServiceServerParams) postmanqv1.EventServiceServer {
 	return &eventServiceServer{
 		logger:                  params.Logger,
 		workflowExecutorFactory: params.WorkflowExecutorFactory,

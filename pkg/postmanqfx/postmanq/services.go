@@ -2,9 +2,9 @@ package postmanq
 
 import (
 	"context"
-	"github.com/postmanq/postmanq/pkg/configfx/config"
-	"github.com/postmanq/postmanq/pkg/gen/postmanqv1"
-	"github.com/postmanq/postmanq/pkg/temporalfx/temporal"
+	"github.com/postmanq/postmanq/pkg/commonfx/configfx/config"
+	"github.com/postmanq/postmanq/pkg/commonfx/gen/postmanqv1"
+	"github.com/postmanq/postmanq/pkg/commonfx/temporalfx/temporal"
 	"go.temporal.io/sdk/workflow"
 )
 

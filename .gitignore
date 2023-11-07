@@ -1,6 +1,6 @@
 .idea
 .env
-out
 vendor
 config.yml
 test.go
+dist/

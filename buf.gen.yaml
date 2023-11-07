@@ -1,16 +1,16 @@
 version: v1
 plugins:
 - name: go-patch
-  out: pkg/gen
+  out: pkg/commonfx/gen
   opt:
     - plugin=go
 - name: go-patch
-  out: pkg/gen
+  out: pkg/commonfx/gen
   opt:
     - plugin=go-grpc
     - require_unimplemented_servers=false
 - name: grpc-gateway
-  out: pkg/gen
+  out: pkg/commonfx/gen
 - name: openapiv2
   out: api/openapi-spec
   opt:

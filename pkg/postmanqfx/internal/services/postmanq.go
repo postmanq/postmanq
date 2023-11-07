@@ -2,36 +2,35 @@ package services
 
 import (
 	"context"
-	"github.com/postmanq/postmanq/pkg/collection"
-	"github.com/postmanq/postmanq/pkg/configfx/config"
-	"github.com/postmanq/postmanq/pkg/gen/postmanqv1"
-	"github.com/postmanq/postmanq/pkg/logfx/log"
+	"github.com/postmanq/postmanq/pkg/commonfx/collection"
+	"github.com/postmanq/postmanq/pkg/commonfx/configfx/config"
+	"github.com/postmanq/postmanq/pkg/commonfx/gen/postmanqv1"
+	"github.com/postmanq/postmanq/pkg/commonfx/logfx/log"
+	"github.com/postmanq/postmanq/pkg/commonfx/temporalfx/temporal"
 	"github.com/postmanq/postmanq/pkg/postmanqfx/postmanq"
-	"github.com/postmanq/postmanq/pkg/temporalfx/temporal"
 	"go.temporal.io/sdk/workflow"
 	"go.uber.org/fx"
 )
 
 type InvokerParams struct {
 	fx.In
-	Config             *postmanq.Config
 	Logger             log.Logger
 	ProviderFactory    config.ProviderFactory
 	Provider           config.Provider
-	PluginDescriptors  []postmanq.PluginDescriptor
+	PluginDescriptors  []postmanq.PluginDescriptor `group:"plugins"`
 	WorkerFactory      temporal.WorkerFactory
 	EventSenderFactory postmanq.EventSenderFactory
 }
 
 func NewFxInvoker(params InvokerParams) (postmanq.Invoker, error) {
-	cfg := new(postmanq.Config)
-	err := params.Provider.Populate(cfg)
+	var configPipelines []postmanq.ConfigPipeline
+	err := params.Provider.PopulateByKey("pipelines", &configPipelines)
 	if err != nil {
 		return nil, err
 	}
 
 	return &invoker{
-		config:             params.Config,
+		configPipelines:    configPipelines,
 		logger:             params.Logger,
 		providerFactory:    params.ProviderFactory,
 		pluginDescriptors:  params.PluginDescriptors,
@@ -42,7 +41,7 @@ func NewFxInvoker(params InvokerParams) (postmanq.Invoker, error) {
 }
 
 type invoker struct {
-	config             *postmanq.Config
+	configPipelines    []postmanq.ConfigPipeline
 	logger             log.Logger
 	providerFactory    config.ProviderFactory
 	pluginDescriptors  []postmanq.PluginDescriptor
@@ -52,15 +51,15 @@ type invoker struct {
 }
 
 func (i invoker) Configure() error {
-	for _, pipelineCfg := range i.config.Pipelines {
+	for _, configPipeline := range i.configPipelines {
 		pipeline := &postmanq.Pipeline{
-			Name:        pipelineCfg.Name,
+			Name:        configPipeline.Name,
 			Receivers:   collection.NewSlice[postmanq.ReceiverPlugin](),
 			Middlewares: collection.NewSlice[postmanq.WorkflowPlugin](),
 			Senders:     collection.NewSlice[postmanq.WorkflowPlugin](),
 		}
 
-		for _, pluginCfg := range pipelineCfg.Plugins {
+		for _, pluginCfg := range configPipeline.Plugins {
 			for _, descriptor := range i.pluginDescriptors {
 				if pluginCfg.Name != descriptor.Name {
 					continue
@@ -87,7 +86,7 @@ func (i invoker) Configure() error {
 			}
 		}
 
-		i.pipelines.Set(pipelineCfg.Name, pipeline)
+		i.pipelines.Set(configPipeline.Name, pipeline)
 	}
 	return nil
 }

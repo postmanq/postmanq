@@ -2,9 +2,9 @@ package postmanq
 
 import (
 	"context"
-	"github.com/postmanq/postmanq/pkg/collection"
-	"github.com/postmanq/postmanq/pkg/configfx/config"
-	"github.com/postmanq/postmanq/pkg/logfx/log"
+	"github.com/postmanq/postmanq/pkg/commonfx/collection"
+	"github.com/postmanq/postmanq/pkg/commonfx/configfx/config"
+	"github.com/postmanq/postmanq/pkg/commonfx/logfx/log"
 	"go.uber.org/fx"
 )
 

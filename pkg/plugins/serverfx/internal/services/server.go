@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/postmanq/postmanq/pkg/logfx/log"
+	"github.com/postmanq/postmanq/pkg/commonfx/logfx/log"
 	"github.com/postmanq/postmanq/pkg/plugins/serverfx/server"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

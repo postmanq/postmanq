@@ -10,11 +10,11 @@ package mock_postmanq
 
 import (
 	context "context"
+	"github.com/postmanq/postmanq/pkg/commonfx/gen/postmanqv1"
+	"github.com/postmanq/postmanq/pkg/commonfx/temporalfx/temporal"
 	reflect "reflect"
 
-	postmanqv1 "github.com/postmanq/postmanq/pkg/gen/postmanqv1"
 	postmanq "github.com/postmanq/postmanq/pkg/postmanqfx/postmanq"
-	temporal "github.com/postmanq/postmanq/pkg/temporalfx/temporal"
 	workflow "go.temporal.io/sdk/workflow"
 	gomock "go.uber.org/mock/gomock"
 )
