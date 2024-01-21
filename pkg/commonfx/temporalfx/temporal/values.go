@@ -1,7 +1,7 @@
 package temporal
 
 import (
-	"github.com/pkg/errors"
+	"errors"
 	"go.temporal.io/sdk/client"
 	sdkworker "go.temporal.io/sdk/worker"
 	"go.temporal.io/sdk/workflow"

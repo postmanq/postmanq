@@ -3,7 +3,7 @@ package services
 import (
 	"context"
 	"github.com/postmanq/postmanq/pkg/commonfx/configfx/config"
-	postmanqv1 "github.com/postmanq/postmanq/pkg/commonfx/gen/postmanqv1"
+	"github.com/postmanq/postmanq/pkg/commonfx/gen/postmanqv1"
 	"github.com/postmanq/postmanq/pkg/plugins/serverfx/server"
 	"github.com/postmanq/postmanq/pkg/postmanqfx/postmanq"
 )

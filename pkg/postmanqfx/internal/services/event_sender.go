@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"github.com/postmanq/postmanq/pkg/commonfx/collection"
 	"github.com/postmanq/postmanq/pkg/commonfx/gen/postmanqv1"
 	"github.com/postmanq/postmanq/pkg/commonfx/logfx/log"
@@ -55,20 +56,42 @@ type eventSender struct {
 }
 
 func (s *eventSender) SendEvent(ctx workflow.Context, event *postmanqv1.Event) error {
-	err := s.executeActivities(ctx, s.pipeline.Middlewares, event)
+	err := s.executeOrResend(ctx, s.pipeline.Middlewares, event)
 	if err != nil {
-		return s.handleError(event)
+		return err
 	}
 
-	err = s.executeActivities(ctx, s.pipeline.Senders, event)
+	err = s.executeOrResend(ctx, s.pipeline.Senders, event)
 	if err != nil {
-		return s.handleError(event)
+		return err
 	}
 
 	return nil
 }
 
-func (s *eventSender) executeActivities(ctx workflow.Context, activities collection.Slice[postmanq.WorkflowPlugin], event *postmanqv1.Event) error {
+func (s *eventSender) executeOrResend(
+	ctx workflow.Context,
+	activities collection.Slice[postmanq.WorkflowPlugin],
+	event *postmanqv1.Event,
+) error {
+	activityErr := s.execute(ctx, activities, event)
+	if activityErr != nil {
+		resendErr := s.resend(event)
+		if resendErr != nil {
+			return errors.Join(activityErr, resendErr)
+		}
+
+		return activityErr
+	}
+
+	return nil
+}
+
+func (s *eventSender) execute(
+	ctx workflow.Context,
+	activities collection.Slice[postmanq.WorkflowPlugin],
+	event *postmanqv1.Event,
+) error {
 	for _, plugin := range activities.Entries() {
 		executor := s.activityExecutorFactory.Create(plugin.GetActivityDescriptor().GetActivityType())
 		_, err := executor.Execute(ctx, event)
@@ -81,7 +104,7 @@ func (s *eventSender) executeActivities(ctx workflow.Context, activities collect
 	return nil
 }
 
-func (s *eventSender) handleError(event *postmanqv1.Event) error {
+func (s *eventSender) resend(event *postmanqv1.Event) error {
 	event.AttemptsCount++
 	executor := s.workflowExecutorFactory.Create(
 		temporal.WithWorkflowType(temporal.WorkflowTypeSendEvent),

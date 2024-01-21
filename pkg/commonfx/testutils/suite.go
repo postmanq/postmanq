@@ -3,9 +3,9 @@ package testutils
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
 	"github.com/postmanq/postmanq/pkg/commonfx/temporalfx/temporal"
 	"github.com/stretchr/testify/suite"
 	"github.com/uptrace/bun"
@@ -15,6 +15,7 @@ import (
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
 	"go.temporal.io/sdk/workflow"
+	"go.uber.org/mock/gomock"
 	"path/filepath"
 	"runtime"
 	"time"
@@ -35,21 +36,36 @@ const (
 var (
 	temporalPortId   = fmt.Sprintf("%d/tcp", temporalPort)
 	temporalDBPortId = fmt.Sprintf("%d/tcp", dbPort)
+	ErrAny           = errors.New("any error")
 )
 
-type TemporalSuite struct {
+type Suite struct {
 	suite.Suite
+	Ctx  context.Context
+	Ctrl *gomock.Controller
+}
+
+func (s *Suite) SetupSuite() {
+	s.Ctrl = gomock.NewController(s.T())
+	s.Ctx = context.Background()
+}
+
+func (s *Suite) TearDownSuite() {
+	s.Ctrl.Finish()
+}
+
+type TemporalSuite struct {
+	Suite
 	pool        *Pool
 	dbRes       *Resource
 	temporalRes *Resource
-	Ctx         context.Context
 	Client      client.Client
 	Worker      worker.Worker
 }
 
 func (s *TemporalSuite) SetupSuite() {
 	var err error
-	s.Ctx = context.Background()
+	s.Suite.SetupSuite()
 	_, path, _, _ := runtime.Caller(0)
 	s.pool = GetPool()
 	s.dbRes = s.pool.Run(
@@ -133,7 +149,7 @@ func (s *TemporalSuite) SetupSuite() {
 
 func (s *TemporalSuite) SendEventWorkflow(ctx workflow.Context) (bool, error) {
 	activityOptions := workflow.ActivityOptions{
-		StartToCloseTimeout: 10 * time.Second,
+		StartToCloseTimeout: 5 * time.Second,
 	}
 	ctx = workflow.WithActivityOptions(ctx, activityOptions)
 	s.T().Log("run workflow")
@@ -144,8 +160,9 @@ func (s *TemporalSuite) ExecuteWorkflow() bool {
 	run, err := s.Client.ExecuteWorkflow(
 		s.Ctx,
 		client.StartWorkflowOptions{
-			ID:        uuid.NewString(),
-			TaskQueue: string(temporal.WorkflowTypeSendEvent),
+			ID:                       uuid.NewString(),
+			TaskQueue:                string(temporal.WorkflowTypeSendEvent),
+			WorkflowExecutionTimeout: 5 * time.Second,
 		},
 		string(temporal.WorkflowTypeSendEvent),
 	)
@@ -161,4 +178,5 @@ func (s *TemporalSuite) TearDownSuite() {
 	s.Client.Close()
 	s.pool.Purge(s.temporalRes)
 	s.pool.Purge(s.dbRes)
+	s.Suite.TearDownSuite()
 }
