@@ -55,18 +55,18 @@ type eventSender struct {
 	pipeline                *postmanq.Pipeline
 }
 
-func (s *eventSender) SendEvent(ctx workflow.Context, event *postmanqv1.Event) error {
+func (s *eventSender) SendEvent(ctx workflow.Context, event *postmanqv1.Event) (*postmanqv1.Event, error) {
 	err := s.executeOrResend(ctx, s.pipeline.Middlewares, event)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = s.executeOrResend(ctx, s.pipeline.Senders, event)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return event, nil
 }
 
 func (s *eventSender) executeOrResend(
@@ -93,10 +93,9 @@ func (s *eventSender) execute(
 	event *postmanqv1.Event,
 ) error {
 	for _, plugin := range activities.Entries() {
-		executor := s.activityExecutorFactory.Create(plugin.GetActivityDescriptor().GetActivityType())
+		executor := s.activityExecutorFactory.Create(plugin.GetType())
 		_, err := executor.Execute(ctx, event)
 		if err != nil {
-			s.logger.Error(err)
 			return err
 		}
 	}
@@ -114,7 +113,6 @@ func (s *eventSender) resend(event *postmanqv1.Event) error {
 	)
 	_, err := executor.Execute(s.ctx, event)
 	if err != nil {
-		s.logger.Error(err)
 		return err
 	}
 

@@ -19,7 +19,8 @@ type ReceiverPlugin interface {
 
 type WorkflowPlugin interface {
 	Plugin
-	GetActivityDescriptor() temporal.ActivityDescriptor
+	GetType() string
+	OnEvent(ctx workflow.Context, event *postmanqv1.Event) (*postmanqv1.Event, error)
 }
 
 type EventSenderFactory interface {
@@ -27,10 +28,10 @@ type EventSenderFactory interface {
 }
 
 type EventSender interface {
-	SendEvent(ctx workflow.Context, event *postmanqv1.Event) error
+	SendEvent(ctx workflow.Context, event *postmanqv1.Event) (*postmanqv1.Event, error)
 }
 
-type SendEventWorkflow func(ctx workflow.Context, event *postmanqv1.Event) error
+type SendEventWorkflow func(ctx workflow.Context, event *postmanqv1.Event) (*postmanqv1.Event, error)
 
 func (w SendEventWorkflow) GetWorkflowType() temporal.WorkflowType {
 	return temporal.WorkflowTypeSendEvent

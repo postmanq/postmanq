@@ -314,43 +314,6 @@ func (mr *MockWorkflowOptionMockRecorder) Apply(settings any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Apply", reflect.TypeOf((*MockWorkflowOption)(nil).Apply), settings)
 }
 
-// MockActivityDescriptor is a mock of ActivityDescriptor interface.
-type MockActivityDescriptor struct {
-	ctrl     *gomock.Controller
-	recorder *MockActivityDescriptorMockRecorder
-}
-
-// MockActivityDescriptorMockRecorder is the mock recorder for MockActivityDescriptor.
-type MockActivityDescriptorMockRecorder struct {
-	mock *MockActivityDescriptor
-}
-
-// NewMockActivityDescriptor creates a new mock instance.
-func NewMockActivityDescriptor(ctrl *gomock.Controller) *MockActivityDescriptor {
-	mock := &MockActivityDescriptor{ctrl: ctrl}
-	mock.recorder = &MockActivityDescriptorMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockActivityDescriptor) EXPECT() *MockActivityDescriptorMockRecorder {
-	return m.recorder
-}
-
-// GetActivityType mocks base method.
-func (m *MockActivityDescriptor) GetActivityType() string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetActivityType")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// GetActivityType indicates an expected call of GetActivityType.
-func (mr *MockActivityDescriptorMockRecorder) GetActivityType() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActivityType", reflect.TypeOf((*MockActivityDescriptor)(nil).GetActivityType))
-}
-
 // MockWorkflowExecutorFactory is a mock of WorkflowExecutorFactory interface.
 type MockWorkflowExecutorFactory[I any, O any] struct {
 	ctrl     *gomock.Controller

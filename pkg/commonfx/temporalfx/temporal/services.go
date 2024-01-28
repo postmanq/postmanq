@@ -205,10 +205,6 @@ func WithStartDelay(duration time.Duration) WorkflowOption {
 	return withStartDelay(duration)
 }
 
-type ActivityDescriptor interface {
-	GetActivityType() string
-}
-
 var InterruptCh = func() <-chan interface{} {
 	return sdkworker.InterruptCh()
 }

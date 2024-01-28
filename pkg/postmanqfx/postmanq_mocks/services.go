@@ -14,7 +14,6 @@ import (
 	reflect "reflect"
 
 	postmanqv1 "github.com/postmanq/postmanq/pkg/commonfx/gen/postmanqv1"
-	temporal "github.com/postmanq/postmanq/pkg/commonfx/temporalfx/temporal"
 	postmanq "github.com/postmanq/postmanq/pkg/postmanqfx/postmanq"
 	workflow "go.temporal.io/sdk/workflow"
 	gomock "go.uber.org/mock/gomock"
@@ -103,18 +102,33 @@ func (m *MockWorkflowPlugin) EXPECT() *MockWorkflowPluginMockRecorder {
 	return m.recorder
 }
 
-// GetActivityDescriptor mocks base method.
-func (m *MockWorkflowPlugin) GetActivityDescriptor() temporal.ActivityDescriptor {
+// GetType mocks base method.
+func (m *MockWorkflowPlugin) GetType() string {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetActivityDescriptor")
-	ret0, _ := ret[0].(temporal.ActivityDescriptor)
+	ret := m.ctrl.Call(m, "GetType")
+	ret0, _ := ret[0].(string)
 	return ret0
 }
 
-// GetActivityDescriptor indicates an expected call of GetActivityDescriptor.
-func (mr *MockWorkflowPluginMockRecorder) GetActivityDescriptor() *gomock.Call {
+// GetType indicates an expected call of GetType.
+func (mr *MockWorkflowPluginMockRecorder) GetType() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActivityDescriptor", reflect.TypeOf((*MockWorkflowPlugin)(nil).GetActivityDescriptor))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetType", reflect.TypeOf((*MockWorkflowPlugin)(nil).GetType))
+}
+
+// OnEvent mocks base method.
+func (m *MockWorkflowPlugin) OnEvent(ctx workflow.Context, event *postmanqv1.Event) (*postmanqv1.Event, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "OnEvent", ctx, event)
+	ret0, _ := ret[0].(*postmanqv1.Event)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// OnEvent indicates an expected call of OnEvent.
+func (mr *MockWorkflowPluginMockRecorder) OnEvent(ctx, event any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnEvent", reflect.TypeOf((*MockWorkflowPlugin)(nil).OnEvent), ctx, event)
 }
 
 // MockEventSenderFactory is a mock of EventSenderFactory interface.
@@ -178,11 +192,12 @@ func (m *MockEventSender) EXPECT() *MockEventSenderMockRecorder {
 }
 
 // SendEvent mocks base method.
-func (m *MockEventSender) SendEvent(ctx workflow.Context, event *postmanqv1.Event) error {
+func (m *MockEventSender) SendEvent(ctx workflow.Context, event *postmanqv1.Event) (*postmanqv1.Event, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendEvent", ctx, event)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(*postmanqv1.Event)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // SendEvent indicates an expected call of SendEvent.

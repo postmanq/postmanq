@@ -109,12 +109,15 @@ func (i invoker) Run(ctx context.Context) error {
 		workflowPlugins.Add(pipeline.Senders.Entries()...)
 		activityDescriptors := collection.NewSlice[temporal.ActivityDescriptor]()
 		for _, plugin := range workflowPlugins.Entries() {
-			activityDescriptors.Add(plugin.GetActivityDescriptor())
+			activityDescriptors.Add(temporal.ActivityDescriptor{
+				Type: plugin.GetType(),
+				Func: plugin.OnEvent,
+			})
 		}
 
 		sender := i.eventSenderFactory.Create(pipeline)
 		worker, err := i.workerFactory.CreateByDescriptor(ctx, temporal.WorkerDescriptor{
-			Workflow: postmanq.SendEventWorkflow(func(ctx workflow.Context, event *postmanqv1.Event) error {
+			Workflow: postmanq.SendEventWorkflow(func(ctx workflow.Context, event *postmanqv1.Event) (*postmanqv1.Event, error) {
 				return sender.SendEvent(ctx, event)
 			}),
 			Activities: activityDescriptors.Entries(),

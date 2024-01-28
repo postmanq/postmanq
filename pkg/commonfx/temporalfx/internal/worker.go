@@ -67,7 +67,7 @@ func (w workerFactory) CreateByDescriptor(ctx context.Context, workerDescriptor 
 	}
 	wrk.RegisterWorkflowWithType(workflowType, workerDescriptor.Workflow)
 	for _, activityDescriptor := range workerDescriptor.Activities {
-		wrk.RegisterActivityWithType(activityDescriptor.GetActivityType(), activityDescriptor)
+		wrk.RegisterActivityWithType(activityDescriptor.Type, activityDescriptor.Func)
 	}
 
 	return wrk, nil

@@ -31,6 +31,14 @@ paths:
           required: false
           type: integer
           format: int64
+        - name: sender
+          in: query
+          required: false
+          type: string
+        - name: receiver
+          in: query
+          required: false
+          type: string
       tags:
         - EventService
 definitions:
@@ -48,6 +56,10 @@ definitions:
       attempts_count:
         type: integer
         format: int64
+      sender:
+        type: string
+      receiver:
+        type: string
   Status:
     type: object
     properties:

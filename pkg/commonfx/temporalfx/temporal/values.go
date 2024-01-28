@@ -41,7 +41,7 @@ type WorkflowType string
 
 const (
 	WorkflowTypeUndefined WorkflowType = ""
-	WorkflowTypeSendEvent WorkflowType = "SendEvent"
+	WorkflowTypeSendEvent WorkflowType = "WorkflowTypeSendEvent"
 )
 
 type ChildWorkflowOptions = workflow.ChildWorkflowOptions
@@ -65,3 +65,8 @@ func (s *WorkflowSettings) GetStartWorkflowOptions() StartWorkflowOptions {
 }
 
 type ActivityOptions workflow.ActivityOptions
+
+type ActivityDescriptor struct {
+	Type string
+	Func interface{}
+}
