@@ -24,7 +24,7 @@ type mxResolver struct {
 
 func (m *mxResolver) Resolve(ctx context.Context, domain string) (collection.Slice[smtp.MxRecord], error) {
 	logger := m.logger.WithCtx(ctx)
-	logger.Debugf("try to resolve mx records for domain %s", domain)
+	logger.Debugf("trying to resolve mx records for domain %s", domain)
 	mxes, err := net.LookupMX(domain)
 	if err != nil {
 		return nil, err

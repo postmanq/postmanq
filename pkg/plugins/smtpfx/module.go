@@ -10,6 +10,8 @@ var (
 		"smtp",
 		fx.Provide(
 			services.NewFxPluginDescriptor,
+			services.NewFxClientBuilderFactory,
+			services.NewFxMxResolver,
 		),
 	)
 )

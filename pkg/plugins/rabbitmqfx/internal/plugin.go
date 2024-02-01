@@ -20,7 +20,7 @@ func NewFxPluginDescriptor(
 			Name:       "rabbitmq",
 			Kind:       postmanq.PluginKindReceiver,
 			MinVersion: 1.0,
-			Construct: func(provider config.Provider) (postmanq.Plugin, error) {
+			Construct: func(ctx context.Context, provider config.Provider) (postmanq.Plugin, error) {
 				var cfg rabbitmq.Config
 				err := provider.Populate(&cfg)
 				if err != nil {

@@ -8,7 +8,7 @@ import (
 	"go.temporal.io/sdk/workflow"
 )
 
-type PluginConstruct func(provider config.Provider) (Plugin, error)
+type PluginConstruct func(ctx context.Context, provider config.Provider) (Plugin, error)
 
 type Plugin interface{}
 
@@ -38,6 +38,6 @@ func (w SendEventWorkflow) GetWorkflowType() temporal.WorkflowType {
 }
 
 type Invoker interface {
-	Configure() error
+	Configure(ctx context.Context) error
 	Run(ctx context.Context) error
 }

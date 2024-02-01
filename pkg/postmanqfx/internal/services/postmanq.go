@@ -50,7 +50,7 @@ type invoker struct {
 	pipelines          collection.Map[string, *postmanq.Pipeline]
 }
 
-func (i invoker) Configure() error {
+func (i invoker) Configure(ctx context.Context) error {
 	for _, configPipeline := range i.configPipelines {
 		pipeline := &postmanq.Pipeline{
 			Name:        configPipeline.Name,
@@ -70,7 +70,7 @@ func (i invoker) Configure() error {
 					return err
 				}
 
-				plugin, err := descriptor.Construct(provider)
+				plugin, err := descriptor.Construct(ctx, provider)
 				if err != nil {
 					return err
 				}

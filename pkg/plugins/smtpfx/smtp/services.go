@@ -8,3 +8,18 @@ import (
 type MxResolver interface {
 	Resolve(ctx context.Context, domain string) (collection.Slice[MxRecord], error)
 }
+
+type ClientBuilderFactory interface {
+	Create(ctx context.Context, cfg Config) (ClientBuilder, error)
+}
+
+type ClientBuilder interface {
+	Create(ctx context.Context, hostname, ip string) (Client, error)
+}
+
+type Client interface {
+	Hello(ctx context.Context, localName string) error
+	Mail(ctx context.Context, from string) error
+	Rcpt(ctx context.Context, to string) error
+	Data(ctx context.Context, data []byte) error
+}
