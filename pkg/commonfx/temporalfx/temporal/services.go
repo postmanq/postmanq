@@ -14,13 +14,13 @@ import (
 type Client client.Client
 
 type WorkerFactory interface {
-	Create(ctx context.Context, workflowType WorkflowType) (Worker, error)
+	Create(ctx context.Context, workflowType string) (Worker, error)
 	CreateByDescriptor(ctx context.Context, workerDescriptor WorkerDescriptor) (Worker, error)
 }
 
 type Worker interface {
 	sdkworker.Worker
-	RegisterWorkflowWithType(workflowType WorkflowType, i interface{})
+	RegisterWorkflowWithType(workflowType string, i interface{})
 	RegisterActivityWithType(activityType string, i interface{})
 }
 
@@ -50,10 +50,6 @@ func WithEnableLoggingInReplay(val bool) WorkerOption {
 	})
 }
 
-type WorkflowDescriptor interface {
-	GetWorkflowType() WorkflowType
-}
-
 type WorkflowOption interface {
 	Apply(settings *WorkflowSettings)
 }
@@ -75,7 +71,7 @@ func (w withWorkflowType) Apply(o *WorkflowSettings) {
 	o.ActivityOptions.TaskQueue = string(w)
 }
 
-func WithWorkflowType(workflowType WorkflowType) WorkflowOption {
+func WithWorkflowType(workflowType string) WorkflowOption {
 	return withWorkflowType(workflowType)
 }
 
@@ -99,7 +95,7 @@ func (w withWorkflowID) Apply(o *WorkflowSettings) {
 	o.StartWorkflowOptions.ID = string(w)
 }
 
-func WithWorkflowID(workflowType WorkflowType, args ...interface{}) WorkflowOption {
+func WithWorkflowID(workflowType string, args ...interface{}) WorkflowOption {
 	if len(args) == 0 {
 		return withWorkflowID(workflowType)
 	}

@@ -37,13 +37,6 @@ type WorkerFactoryIn struct {
 	Descriptors []WorkerDescriptor `group:"temporal_worker"`
 }
 
-type WorkflowType string
-
-const (
-	WorkflowTypeUndefined WorkflowType = ""
-	WorkflowTypeSendEvent WorkflowType = "WorkflowTypeSendEvent"
-)
-
 type ChildWorkflowOptions = workflow.ChildWorkflowOptions
 
 type StartWorkflowOptions struct {
@@ -67,6 +60,11 @@ func (s *WorkflowSettings) GetStartWorkflowOptions() StartWorkflowOptions {
 type ActivityOptions workflow.ActivityOptions
 
 type ActivityDescriptor struct {
+	Type string
+	Func interface{}
+}
+
+type WorkflowDescriptor struct {
 	Type string
 	Func interface{}
 }

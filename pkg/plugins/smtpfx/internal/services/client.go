@@ -89,7 +89,7 @@ type clientBuilder struct {
 	tlsCfg     *tls.Config
 }
 
-func (c *clientBuilder) Create(ctx context.Context, hostname, ip string) (smtp.Client, error) {
+func (c *clientBuilder) Create(ctx context.Context, hostname string) (smtp.Client, error) {
 	tcpAddr, err := net.ResolveTCPAddr("tcp", net.JoinHostPort(*c.ips.Next(), "0"))
 	if err != nil {
 		return nil, err

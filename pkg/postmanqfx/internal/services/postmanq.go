@@ -2,13 +2,12 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"github.com/postmanq/postmanq/pkg/commonfx/collection"
 	"github.com/postmanq/postmanq/pkg/commonfx/configfx/config"
-	"github.com/postmanq/postmanq/pkg/commonfx/gen/postmanqv1"
 	"github.com/postmanq/postmanq/pkg/commonfx/logfx/log"
 	"github.com/postmanq/postmanq/pkg/commonfx/temporalfx/temporal"
 	"github.com/postmanq/postmanq/pkg/postmanqfx/postmanq"
-	"go.temporal.io/sdk/workflow"
 	"go.uber.org/fx"
 )
 
@@ -53,7 +52,7 @@ type invoker struct {
 func (i invoker) Configure(ctx context.Context) error {
 	for _, configPipeline := range i.configPipelines {
 		pipeline := &postmanq.Pipeline{
-			Name:        configPipeline.Name,
+			Queue:       configPipeline.Queue,
 			Receivers:   collection.NewSlice[postmanq.ReceiverPlugin](),
 			Middlewares: collection.NewSlice[postmanq.WorkflowPlugin](),
 			Senders:     collection.NewSlice[postmanq.WorkflowPlugin](),
@@ -86,7 +85,7 @@ func (i invoker) Configure(ctx context.Context) error {
 			}
 		}
 
-		i.pipelines.Set(configPipeline.Name, pipeline)
+		i.pipelines.Set(configPipeline.Queue, pipeline)
 	}
 	return nil
 }
@@ -117,9 +116,10 @@ func (i invoker) Run(ctx context.Context) error {
 
 		sender := i.eventSenderFactory.Create(pipeline)
 		worker, err := i.workerFactory.CreateByDescriptor(ctx, temporal.WorkerDescriptor{
-			Workflow: postmanq.SendEventWorkflow(func(ctx workflow.Context, event *postmanqv1.Event) (*postmanqv1.Event, error) {
-				return sender.SendEvent(ctx, event)
-			}),
+			Workflow: temporal.WorkflowDescriptor{
+				Type: fmt.Sprintf("WorkflowType%s", pipeline.Queue),
+				Func: sender.SendEvent,
+			},
 			Activities: activityDescriptors.Entries(),
 		})
 		if err != nil {

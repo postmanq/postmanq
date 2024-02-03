@@ -43,7 +43,7 @@ func (m *MockWorkerFactory) EXPECT() *MockWorkerFactoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockWorkerFactory) Create(ctx context.Context, workflowType temporal.WorkflowType) (temporal.Worker, error) {
+func (m *MockWorkerFactory) Create(ctx context.Context, workflowType string) (temporal.Worker, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", ctx, workflowType)
 	ret0, _ := ret[0].(temporal.Worker)
@@ -156,7 +156,7 @@ func (mr *MockWorkerMockRecorder) RegisterWorkflowWithOptions(w, options any) *g
 }
 
 // RegisterWorkflowWithType mocks base method.
-func (m *MockWorker) RegisterWorkflowWithType(workflowType temporal.WorkflowType, i any) {
+func (m *MockWorker) RegisterWorkflowWithType(workflowType string, i any) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "RegisterWorkflowWithType", workflowType, i)
 }
@@ -240,43 +240,6 @@ func (m *MockWorkerOption) Apply(arg0 *temporal.WorkerSettings) {
 func (mr *MockWorkerOptionMockRecorder) Apply(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Apply", reflect.TypeOf((*MockWorkerOption)(nil).Apply), arg0)
-}
-
-// MockWorkflowDescriptor is a mock of WorkflowDescriptor interface.
-type MockWorkflowDescriptor struct {
-	ctrl     *gomock.Controller
-	recorder *MockWorkflowDescriptorMockRecorder
-}
-
-// MockWorkflowDescriptorMockRecorder is the mock recorder for MockWorkflowDescriptor.
-type MockWorkflowDescriptorMockRecorder struct {
-	mock *MockWorkflowDescriptor
-}
-
-// NewMockWorkflowDescriptor creates a new mock instance.
-func NewMockWorkflowDescriptor(ctrl *gomock.Controller) *MockWorkflowDescriptor {
-	mock := &MockWorkflowDescriptor{ctrl: ctrl}
-	mock.recorder = &MockWorkflowDescriptorMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockWorkflowDescriptor) EXPECT() *MockWorkflowDescriptorMockRecorder {
-	return m.recorder
-}
-
-// GetWorkflowType mocks base method.
-func (m *MockWorkflowDescriptor) GetWorkflowType() temporal.WorkflowType {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetWorkflowType")
-	ret0, _ := ret[0].(temporal.WorkflowType)
-	return ret0
-}
-
-// GetWorkflowType indicates an expected call of GetWorkflowType.
-func (mr *MockWorkflowDescriptorMockRecorder) GetWorkflowType() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkflowType", reflect.TypeOf((*MockWorkflowDescriptor)(nil).GetWorkflowType))
 }
 
 // MockWorkflowOption is a mock of WorkflowOption interface.

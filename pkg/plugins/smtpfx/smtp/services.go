@@ -14,7 +14,7 @@ type ClientBuilderFactory interface {
 }
 
 type ClientBuilder interface {
-	Create(ctx context.Context, hostname, ip string) (Client, error)
+	Create(ctx context.Context, hostname string) (Client, error)
 }
 
 type Client interface {

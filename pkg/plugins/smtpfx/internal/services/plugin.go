@@ -7,7 +7,6 @@ import (
 	"github.com/postmanq/postmanq/pkg/commonfx/logfx/log"
 	"github.com/postmanq/postmanq/pkg/plugins/smtpfx/smtp"
 	"github.com/postmanq/postmanq/pkg/postmanqfx/postmanq"
-	"go.temporal.io/sdk/workflow"
 )
 
 func NewFxPluginDescriptor(
@@ -51,7 +50,32 @@ func (p plugin) GetType() string {
 	return "ActivityTypeSMTP"
 }
 
-func (p plugin) OnEvent(ctx workflow.Context, event *postmanqv1.Event) (*postmanqv1.Event, error) {
-	//TODO implement me
-	panic("implement me")
+func (p plugin) OnEvent(ctx context.Context, event *postmanqv1.Event) (*postmanqv1.Event, error) {
+
+	cl, err := p.builder.Create(ctx, "")
+	if err != nil {
+		return nil, err
+	}
+
+	err = cl.Hello(ctx, p.cfg.Hostname)
+	if err != nil {
+		return nil, err
+	}
+
+	err = cl.Mail(ctx, event.From)
+	if err != nil {
+		return nil, err
+	}
+
+	err = cl.Rcpt(ctx, event.To)
+	if err != nil {
+		return nil, err
+	}
+
+	err = cl.Data(ctx, event.Data)
+	if err != nil {
+		return nil, err
+	}
+
+	return event, nil
 }

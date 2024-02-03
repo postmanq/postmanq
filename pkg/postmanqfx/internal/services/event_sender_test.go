@@ -51,7 +51,7 @@ func (s *EventSenderTestSuite) SetupSuite() {
 	s.middlewarePlugin = postmanq_mocks.NewMockWorkflowPlugin(s.Ctrl)
 	s.senderPlugin = postmanq_mocks.NewMockWorkflowPlugin(s.Ctrl)
 	s.sender = factory.Create(&postmanq.Pipeline{
-		Name:        randomdata.Title(randomdata.RandomGender),
+		Queue:       randomdata.Title(randomdata.RandomGender),
 		Middlewares: collection.ImportSlice[postmanq.WorkflowPlugin](s.middlewarePlugin),
 		Senders:     collection.ImportSlice[postmanq.WorkflowPlugin](s.senderPlugin),
 	})

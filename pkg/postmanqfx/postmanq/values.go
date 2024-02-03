@@ -40,7 +40,7 @@ const (
 )
 
 type Pipeline struct {
-	Name        string
+	Queue       string
 	Receivers   collection.Slice[ReceiverPlugin]
 	Middlewares collection.Slice[WorkflowPlugin]
 	Senders     collection.Slice[WorkflowPlugin]
@@ -51,7 +51,7 @@ type Config struct {
 }
 
 type ConfigPipeline struct {
-	Name    string         `yaml:"name"`
+	Queue   string         `yaml:"queue"`
 	Plugins []ConfigPlugin `yaml:"plugins"`
 }
 
