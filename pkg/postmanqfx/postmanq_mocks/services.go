@@ -117,7 +117,7 @@ func (mr *MockWorkflowPluginMockRecorder) GetType() *gomock.Call {
 }
 
 // OnEvent mocks base method.
-func (m *MockWorkflowPlugin) OnEvent(ctx workflow.Context, event *postmanqv1.Event) (*postmanqv1.Event, error) {
+func (m *MockWorkflowPlugin) OnEvent(ctx context.Context, event *postmanqv1.Event) (*postmanqv1.Event, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "OnEvent", ctx, event)
 	ret0, _ := ret[0].(*postmanqv1.Event)
@@ -230,17 +230,17 @@ func (m *MockInvoker) EXPECT() *MockInvokerMockRecorder {
 }
 
 // Configure mocks base method.
-func (m *MockInvoker) Configure() error {
+func (m *MockInvoker) Configure(ctx context.Context) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Configure")
+	ret := m.ctrl.Call(m, "Configure", ctx)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Configure indicates an expected call of Configure.
-func (mr *MockInvokerMockRecorder) Configure() *gomock.Call {
+func (mr *MockInvokerMockRecorder) Configure(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Configure", reflect.TypeOf((*MockInvoker)(nil).Configure))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Configure", reflect.TypeOf((*MockInvoker)(nil).Configure), ctx)
 }
 
 // Run mocks base method.

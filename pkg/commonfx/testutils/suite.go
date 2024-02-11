@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/postmanq/postmanq/pkg/commonfx/temporalfx/temporal"
 	"github.com/stretchr/testify/suite"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
@@ -31,6 +30,7 @@ const (
 	dbPort                 = 5432
 	dbUser                 = "postmanq"
 	dbPassword             = "postmanq"
+	queue                  = "WorkflowTypeTest"
 )
 
 var (
@@ -139,9 +139,9 @@ func (s *TemporalSuite) SetupSuite() {
 	})
 	s.Nil(err)
 
-	s.Worker = worker.New(s.Client, string(temporal.WorkflowTypeSendEvent), worker.Options{})
+	s.Worker = worker.New(s.Client, queue, worker.Options{})
 	s.Worker.RegisterWorkflowWithOptions(s.SendEventWorkflow, workflow.RegisterOptions{
-		Name: string(temporal.WorkflowTypeSendEvent),
+		Name: queue,
 	})
 	err = s.Worker.Start()
 	s.Nil(err)
@@ -161,10 +161,10 @@ func (s *TemporalSuite) ExecuteWorkflow() bool {
 		s.Ctx,
 		client.StartWorkflowOptions{
 			ID:                       uuid.NewString(),
-			TaskQueue:                string(temporal.WorkflowTypeSendEvent),
+			TaskQueue:                queue,
 			WorkflowExecutionTimeout: 5 * time.Second,
 		},
-		string(temporal.WorkflowTypeSendEvent),
+		queue,
 	)
 	s.Nil(err)
 

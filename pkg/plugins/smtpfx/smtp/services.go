@@ -22,4 +22,10 @@ type Client interface {
 	Mail(ctx context.Context, from string) error
 	Rcpt(ctx context.Context, to string) error
 	Data(ctx context.Context, data []byte) error
+	HasStatus(ClientStatus) bool
+	Noop() error
+}
+
+type EmailParser interface {
+	Parse(email string) (*EmailAddress, error)
 }

@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/postmanq/postmanq/pkg/commonfx/collection"
 	"github.com/postmanq/postmanq/pkg/commonfx/gen/postmanqv1"
 	"github.com/postmanq/postmanq/pkg/commonfx/logfx/log"
@@ -106,8 +107,8 @@ func (s *eventSender) execute(
 func (s *eventSender) resend(event *postmanqv1.Event) error {
 	event.AttemptsCount++
 	executor := s.workflowExecutorFactory.Create(
-		temporal.WithWorkflowType(temporal.WorkflowTypeSendEvent),
-		temporal.WithWorkflowID(temporal.WorkflowTypeSendEvent, event.Uuid),
+		temporal.WithWorkflowType(fmt.Sprintf("WorkflowType")),
+		temporal.WithWorkflowID(fmt.Sprintf("WorkflowType-%s-%d", event.Uuid, event.AttemptsCount)),
 		temporal.WithWorkflowExecutionTimeout(time.Minute),
 		temporal.WithStartDelay(time.Duration(event.AttemptsCount)*time.Hour),
 	)

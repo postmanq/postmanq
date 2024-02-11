@@ -12,6 +12,7 @@ var (
 			services.NewFxPluginDescriptor,
 			services.NewFxClientBuilderFactory,
 			services.NewFxMxResolver,
+			services.NewFxEmailParser,
 		),
 	)
 )

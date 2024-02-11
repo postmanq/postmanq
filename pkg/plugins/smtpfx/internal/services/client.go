@@ -11,6 +11,7 @@ import (
 	"net"
 	smtp2 "net/smtp"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -115,6 +116,7 @@ func (c *clientBuilder) Create(ctx context.Context, hostname string) (smtp.Clien
 		smtpClient: smtpClient,
 		timeoutCfg: c.timeoutCfg,
 		tlsCfg:     c.tlsCfg,
+		status:     smtp.ClientStatusBusy,
 		tlsStatus:  clientTLSStatusUndefined,
 	}, nil
 }
@@ -133,7 +135,9 @@ type client struct {
 	smtpClient *smtp2.Client
 	timeoutCfg *smtp.TimeoutConfig
 	tlsCfg     *tls.Config
+	status     smtp.ClientStatus
 	tlsStatus  clientTLSStatus
+	mtx        sync.Mutex
 }
 
 func (c *client) Hello(ctx context.Context, localName string) error {
@@ -202,5 +206,23 @@ func (c *client) Data(ctx context.Context, data []byte) error {
 		return err
 	}
 
-	return c.smtpClient.Reset()
+	err = c.smtpClient.Reset()
+	if err != nil {
+		return err
+	}
+
+	c.mtx.Lock()
+	c.status = smtp.ClientStatusFree
+	c.mtx.Unlock()
+	return nil
+}
+
+func (c *client) HasStatus(expectedStatus smtp.ClientStatus) bool {
+	c.mtx.Lock()
+	defer c.mtx.Unlock()
+	return c.status == expectedStatus
+}
+
+func (c *client) Noop() error {
+	return c.smtpClient.Noop()
 }
