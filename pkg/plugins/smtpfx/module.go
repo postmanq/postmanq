@@ -13,6 +13,7 @@ var (
 			services.NewFxClientBuilderFactory,
 			services.NewFxMxResolver,
 			services.NewFxEmailParser,
+			services.NewFxDkimSignerFactory,
 		),
 	)
 )

@@ -14,9 +14,10 @@ import (
 
 func NewFxPluginDescriptor(
 	logger log.Logger,
-	factory smtp.ClientBuilderFactory,
+	clientBuilderFactory smtp.ClientBuilderFactory,
 	resolver smtp.MxResolver,
 	emailParser smtp.EmailParser,
+	dkimSignerFactory smtp.DkimSignerFactory,
 ) postmanq.Result {
 	return postmanq.Result{
 		Descriptor: postmanq.PluginDescriptor{
@@ -30,7 +31,12 @@ func NewFxPluginDescriptor(
 					return nil, err
 				}
 
-				builder, err := factory.Create(ctx, cfg)
+				builder, err := clientBuilderFactory.Create(ctx, cfg)
+				if err != nil {
+					return nil, err
+				}
+
+				ds, err := dkimSignerFactory.Create(cfg)
 				if err != nil {
 					return nil, err
 				}
@@ -43,6 +49,7 @@ func NewFxPluginDescriptor(
 					emailParser: emailParser,
 					descriptors: collection.NewMap[string, *smtp.RecipientDescriptor](),
 					noopTicker:  time.NewTicker(time.Minute),
+					dkimSigner:  ds,
 				}
 				go p.startBackgroundProcess()
 				return p, nil
@@ -60,6 +67,7 @@ type plugin struct {
 	descriptors collection.Map[string, *smtp.RecipientDescriptor]
 	mtx         sync.Mutex
 	noopTicker  *time.Ticker
+	dkimSigner  smtp.DkimSigner
 }
 
 func (p *plugin) GetType() string {
@@ -136,6 +144,11 @@ createClient:
 	}
 
 	err = cl.Rcpt(ctx, event.To)
+	if err != nil {
+		return nil, err
+	}
+
+	event.Data, err = p.dkimSigner.Sign(event.Data)
 	if err != nil {
 		return nil, err
 	}

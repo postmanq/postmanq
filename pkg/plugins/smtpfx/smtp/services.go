@@ -29,3 +29,11 @@ type Client interface {
 type EmailParser interface {
 	Parse(email string) (*EmailAddress, error)
 }
+
+type DkimSignerFactory interface {
+	Create(cfg Config) (DkimSigner, error)
+}
+
+type DkimSigner interface {
+	Sign(data []byte) ([]byte, error)
+}
