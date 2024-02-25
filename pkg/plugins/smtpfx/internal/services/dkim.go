@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"crypto/x509"
 	"encoding/pem"
+	"errors"
+	"fmt"
 	"github.com/emersion/go-msgauth/dkim"
 	"github.com/postmanq/postmanq/pkg/plugins/smtpfx/smtp"
 	"os"
@@ -17,13 +19,22 @@ type dkimSignerFactory struct {
 }
 
 func (d dkimSignerFactory) Create(cfg smtp.Config) (smtp.DkimSigner, error) {
-	buf, err := os.ReadFile(cfg.TLS.Certificate)
+	buf, err := os.ReadFile(cfg.TLS.PrivateKey)
 	if err != nil {
 		return nil, err
 	}
 
 	block, _ := pem.Decode(buf)
+	if block == nil {
+		return nil, errors.New(fmt.Sprintf("could not decode PEM block from file %s", cfg.TLS.PrivateKey))
+	}
+
 	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+
+	err = privateKey.Validate()
 	if err != nil {
 		return nil, err
 	}

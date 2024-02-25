@@ -110,6 +110,11 @@ func (c *clientBuilder) Create(ctx context.Context, hostname string) (smtp.Clien
 		return nil, err
 	}
 
+	tlsStatus := clientTLSStatusUndefined
+	if c.tlsCfg == nil {
+		tlsStatus = clientTLSStatusDontUse
+	}
+
 	return &client{
 		logger:     c.logger,
 		conn:       conn,
@@ -117,7 +122,7 @@ func (c *clientBuilder) Create(ctx context.Context, hostname string) (smtp.Clien
 		timeoutCfg: c.timeoutCfg,
 		tlsCfg:     c.tlsCfg,
 		status:     smtp.ClientStatusBusy,
-		tlsStatus:  clientTLSStatusUndefined,
+		tlsStatus:  tlsStatus,
 	}, nil
 }
 
