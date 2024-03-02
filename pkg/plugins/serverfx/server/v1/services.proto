@@ -1,16 +1,16 @@
 syntax = "proto3";
 
-package server;
+package server.v1;
 
 option go_package = "github.com/postmanq/postmanq/pkg/plugins/serverfx/server";
 
-//import "google/api/annotations.proto";
+import "google/api/annotations.proto";
 import "postmanq/v1/postmanq.proto";
 
 service EventService {
 	rpc ReceiveEvent(postmanq.v1.Event) returns (postmanq.v1.Event) {
-//		option (google.api.http) = {
-//			post: "/v1/event";
-//		};
+		option (google.api.http) = {
+			post: "/v1/event";
+		};
 	};
 }

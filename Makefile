@@ -2,7 +2,6 @@ PROJECT_DIR=$(shell pwd)
 PLUGIN_DIR=$(PROJECT_DIR)/pkg/plugins
 DIST_DIR=$(PROJECT_DIR)/dist
 DIST_PLUGIN_DIR=$(DIST_DIR)/plugins
-MOCK_DIR=$(PROJECT_DIR)/mock
 
 DOCKER_DIR=$(PROJECT_DIR)/deployments
 DOCKER_PROJECT=postmanq
@@ -15,9 +14,6 @@ GOCMD=go
 GOBUILD=$(GOCMD) build -ldflags="-extldflags=-Wl,-ld_classic"
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
-
-BUILD_PROTO_DIR=$(PROJECT_DIR)/api/proto/postmanq
-BUILD_GEN_DIR=$(PROJECT_DIR)/pkg/common/gen
 
 -include .env
 export
@@ -33,15 +29,14 @@ lint:
 
 clean:
 	rm -rf $(DIST_DIR)
-	rm -rf $(MOCK_DIR)
 
 buf_update:
 	buf mod update
 
 buf_generate:
-	rm -rf $(BUILD_GEN_DIR)
-	mkdir -p $(BUILD_GEN_DIR)
-	buf generate --path $(BUILD_PROTO_DIR)
+	buf generate
+	cp -R $(DIST_DIR)/github.com/postmanq/postmanq/pkg $(PROJECT_DIR)
+	rm -rf $(DIST_DIR)/github.com
 
 build_plugins:
 	rm -rf $(DIST_PLUGIN_DIR)
@@ -59,6 +54,3 @@ infra_up:
 
 infra_down:
 	docker-compose -p $(DOCKER_PROJECT) -f $(DOCKER_COMPOSE_INFRA) down --remove-orphans
-
-buf_generate_1:
-	cd $(PROJECT_DIR)/pkg/postmanqfx && buf mod update && buf generate -v --debug --path proto/

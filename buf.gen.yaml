@@ -5,13 +5,14 @@ plugins:
   opt:
     - plugin=go
 - name: go-patch
-  out: pkg/commonfx/gen
+  out: dist
   opt:
     - plugin=go-grpc
     - require_unimplemented_servers=false
 - name: grpc-gateway
-  out: pkg/commonfx/gen
+  out: dist
 - name: openapiv2
+  strategy: all
   out: api/openapi-spec
   opt:
     - output_format=yaml

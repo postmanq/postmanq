@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"github.com/postmanq/postmanq/pkg/commonfx/configfx/config"
-	"github.com/postmanq/postmanq/pkg/commonfx/gen/postmanqv1"
 	"github.com/postmanq/postmanq/pkg/plugins/serverfx/server"
 	"github.com/postmanq/postmanq/pkg/postmanqfx/postmanq"
 )
@@ -33,7 +32,7 @@ func NewFxPluginDescriptor(
 					server: srv,
 					descriptor: server.Descriptor{
 						Server:               eventServiceServerFactory.Create(ctx, pipeline),
-						GRPCGatewayRegistrar: postmanqv1.RegisterEventServiceHandlerFromEndpoint,
+						GRPCGatewayRegistrar: server.RegisterEventServiceHandlerFromEndpoint,
 					},
 				}, nil
 			},

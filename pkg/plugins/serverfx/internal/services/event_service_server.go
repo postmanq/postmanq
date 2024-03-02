@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"fmt"
-	"github.com/postmanq/postmanq/pkg/commonfx/gen/postmanqv1"
 	"github.com/postmanq/postmanq/pkg/commonfx/logfx/log"
 	"github.com/postmanq/postmanq/pkg/commonfx/temporalfx/temporal"
 	"github.com/postmanq/postmanq/pkg/plugins/serverfx/server"
@@ -13,7 +12,7 @@ import (
 
 func NewFxEventServiceServerFactory(
 	logger log.Logger,
-	workflowExecutorFactory temporal.WorkflowExecutorFactory[*postmanqv1.Event, *postmanqv1.Event],
+	workflowExecutorFactory temporal.WorkflowExecutorFactory[*postmanq.Event, *postmanq.Event],
 ) server.EventServiceServerFactory {
 	return &eventServiceServerFactory{
 		logger:                  logger,
@@ -23,7 +22,7 @@ func NewFxEventServiceServerFactory(
 
 type eventServiceServerFactory struct {
 	logger                  log.Logger
-	workflowExecutorFactory temporal.WorkflowExecutorFactory[*postmanqv1.Event, *postmanqv1.Event]
+	workflowExecutorFactory temporal.WorkflowExecutorFactory[*postmanq.Event, *postmanq.Event]
 }
 
 func (f *eventServiceServerFactory) Create(ctx context.Context, pipeline postmanq.Pipeline) server.EventServiceServer {
@@ -37,10 +36,10 @@ func (f *eventServiceServerFactory) Create(ctx context.Context, pipeline postman
 type eventServiceServer struct {
 	pipeline                postmanq.Pipeline
 	logger                  log.Logger
-	workflowExecutorFactory temporal.WorkflowExecutorFactory[*postmanqv1.Event, *postmanqv1.Event]
+	workflowExecutorFactory temporal.WorkflowExecutorFactory[*postmanq.Event, *postmanq.Event]
 }
 
-func (s *eventServiceServer) ReceiveEvent(ctx context.Context, event *postmanqv1.Event) (*postmanqv1.Event, error) {
+func (s *eventServiceServer) ReceiveEvent(ctx context.Context, event *postmanq.Event) (*postmanq.Event, error) {
 	executor := s.workflowExecutorFactory.Create(
 		temporal.WithWorkflowType(fmt.Sprintf("WorkflowType%s", s.pipeline.Queue)),
 		temporal.WithWorkflowID(fmt.Sprintf("WorkflowType%s_%s_%d", s.pipeline.Queue, event.Uuid, event.AttemptsCount)),
