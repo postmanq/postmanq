@@ -2,12 +2,13 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             (unknown)
-// source: api/proto/postmanq/v1/service.proto
+// source: server/v1/services.proto
 
-package postmanqv1
+package server
 
 import (
 	context "context"
+	postmanq "github.com/postmanq/postmanq/pkg/postmanqfx/postmanq"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -22,7 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type EventServiceClient interface {
-	ReceiveEvent(ctx context.Context, in *Event, opts ...grpc.CallOption) (*Event, error)
+	ReceiveEvent(ctx context.Context, in *postmanq.Event, opts ...grpc.CallOption) (*postmanq.Event, error)
 }
 
 type eventServiceClient struct {
@@ -33,9 +34,9 @@ func NewEventServiceClient(cc grpc.ClientConnInterface) EventServiceClient {
 	return &eventServiceClient{cc}
 }
 
-func (c *eventServiceClient) ReceiveEvent(ctx context.Context, in *Event, opts ...grpc.CallOption) (*Event, error) {
-	out := new(Event)
-	err := c.cc.Invoke(ctx, "/postmanqv1.EventService/ReceiveEvent", in, out, opts...)
+func (c *eventServiceClient) ReceiveEvent(ctx context.Context, in *postmanq.Event, opts ...grpc.CallOption) (*postmanq.Event, error) {
+	out := new(postmanq.Event)
+	err := c.cc.Invoke(ctx, "/server.EventService/ReceiveEvent", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,14 +47,14 @@ func (c *eventServiceClient) ReceiveEvent(ctx context.Context, in *Event, opts .
 // All implementations should embed UnimplementedEventServiceServer
 // for forward compatibility
 type EventServiceServer interface {
-	ReceiveEvent(context.Context, *Event) (*Event, error)
+	ReceiveEvent(context.Context, *postmanq.Event) (*postmanq.Event, error)
 }
 
 // UnimplementedEventServiceServer should be embedded to have forward compatible implementations.
 type UnimplementedEventServiceServer struct {
 }
 
-func (UnimplementedEventServiceServer) ReceiveEvent(context.Context, *Event) (*Event, error) {
+func (UnimplementedEventServiceServer) ReceiveEvent(context.Context, *postmanq.Event) (*postmanq.Event, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReceiveEvent not implemented")
 }
 
@@ -69,7 +70,7 @@ func RegisterEventServiceServer(s grpc.ServiceRegistrar, srv EventServiceServer)
 }
 
 func _EventService_ReceiveEvent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Event)
+	in := new(postmanq.Event)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -78,10 +79,10 @@ func _EventService_ReceiveEvent_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/postmanqv1.EventService/ReceiveEvent",
+		FullMethod: "/server.EventService/ReceiveEvent",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EventServiceServer).ReceiveEvent(ctx, req.(*Event))
+		return srv.(EventServiceServer).ReceiveEvent(ctx, req.(*postmanq.Event))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -90,7 +91,7 @@ func _EventService_ReceiveEvent_Handler(srv interface{}, ctx context.Context, de
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var EventService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "postmanqv1.EventService",
+	ServiceName: "server.EventService",
 	HandlerType: (*EventServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -99,5 +100,5 @@ var EventService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/proto/postmanq/v1/service.proto",
+	Metadata: "server/v1/services.proto",
 }

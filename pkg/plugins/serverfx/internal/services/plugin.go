@@ -9,9 +9,8 @@ import (
 )
 
 func NewFxPluginDescriptor(
-	ctx context.Context,
-	factory server.Factory,
-	eventServiceServer postmanqv1.EventServiceServer,
+	serverFactory server.Factory,
+	eventServiceServerFactory server.EventServiceServerFactory,
 ) postmanq.Result {
 	return postmanq.Result{
 		Descriptor: postmanq.PluginDescriptor{
@@ -25,7 +24,7 @@ func NewFxPluginDescriptor(
 					return nil, err
 				}
 
-				srv, err := factory.Create(ctx, cfg)
+				srv, err := serverFactory.Create(ctx, cfg)
 				if err != nil {
 					return nil, err
 				}
@@ -33,7 +32,7 @@ func NewFxPluginDescriptor(
 				return &plugin{
 					server: srv,
 					descriptor: server.Descriptor{
-						Server:               eventServiceServer,
+						Server:               eventServiceServerFactory.Create(ctx, pipeline),
 						GRPCGatewayRegistrar: postmanqv1.RegisterEventServiceHandlerFromEndpoint,
 					},
 				}, nil

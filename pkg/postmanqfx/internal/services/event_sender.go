@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/postmanq/postmanq/pkg/commonfx/collection"
-	"github.com/postmanq/postmanq/pkg/commonfx/gen/postmanqv1"
 	"github.com/postmanq/postmanq/pkg/commonfx/logfx/log"
 	"github.com/postmanq/postmanq/pkg/commonfx/temporalfx/temporal"
 	"github.com/postmanq/postmanq/pkg/postmanqfx/postmanq"
@@ -18,8 +17,8 @@ type EventSenderFactoryParams struct {
 	fx.In
 	Ctx                     context.Context
 	Logger                  log.Logger
-	WorkflowExecutorFactory temporal.WorkflowExecutorFactory[*postmanqv1.Event, *postmanqv1.Event]
-	ActivityExecutorFactory temporal.ActivityExecutorFactory[*postmanqv1.Event, *postmanqv1.Event]
+	WorkflowExecutorFactory temporal.WorkflowExecutorFactory[*postmanq.Event, *postmanq.Event]
+	ActivityExecutorFactory temporal.ActivityExecutorFactory[*postmanq.Event, *postmanq.Event]
 }
 
 func NewFxEventSenderFactory(params EventSenderFactoryParams) postmanq.EventSenderFactory {
@@ -34,8 +33,8 @@ func NewFxEventSenderFactory(params EventSenderFactoryParams) postmanq.EventSend
 type eventSenderFactory struct {
 	ctx                     context.Context
 	logger                  log.Logger
-	workflowExecutorFactory temporal.WorkflowExecutorFactory[*postmanqv1.Event, *postmanqv1.Event]
-	activityExecutorFactory temporal.ActivityExecutorFactory[*postmanqv1.Event, *postmanqv1.Event]
+	workflowExecutorFactory temporal.WorkflowExecutorFactory[*postmanq.Event, *postmanq.Event]
+	activityExecutorFactory temporal.ActivityExecutorFactory[*postmanq.Event, *postmanq.Event]
 }
 
 func (f *eventSenderFactory) Create(pipeline *postmanq.Pipeline) postmanq.EventSender {
@@ -51,12 +50,12 @@ func (f *eventSenderFactory) Create(pipeline *postmanq.Pipeline) postmanq.EventS
 type eventSender struct {
 	ctx                     context.Context
 	logger                  log.Logger
-	workflowExecutorFactory temporal.WorkflowExecutorFactory[*postmanqv1.Event, *postmanqv1.Event]
-	activityExecutorFactory temporal.ActivityExecutorFactory[*postmanqv1.Event, *postmanqv1.Event]
+	workflowExecutorFactory temporal.WorkflowExecutorFactory[*postmanq.Event, *postmanq.Event]
+	activityExecutorFactory temporal.ActivityExecutorFactory[*postmanq.Event, *postmanq.Event]
 	pipeline                *postmanq.Pipeline
 }
 
-func (s *eventSender) SendEvent(ctx workflow.Context, event *postmanqv1.Event) (*postmanqv1.Event, error) {
+func (s *eventSender) SendEvent(ctx workflow.Context, event *postmanq.Event) (*postmanq.Event, error) {
 	err := s.executeOrResend(ctx, s.pipeline.Middlewares, event)
 	if err != nil {
 		return nil, err
@@ -73,7 +72,7 @@ func (s *eventSender) SendEvent(ctx workflow.Context, event *postmanqv1.Event) (
 func (s *eventSender) executeOrResend(
 	ctx workflow.Context,
 	activities collection.Slice[postmanq.WorkflowPlugin],
-	event *postmanqv1.Event,
+	event *postmanq.Event,
 ) error {
 	activityErr := s.execute(ctx, activities, event)
 	if activityErr != nil {
@@ -91,7 +90,7 @@ func (s *eventSender) executeOrResend(
 func (s *eventSender) execute(
 	ctx workflow.Context,
 	activities collection.Slice[postmanq.WorkflowPlugin],
-	event *postmanqv1.Event,
+	event *postmanq.Event,
 ) error {
 	for _, plugin := range activities.Entries() {
 		executor := s.activityExecutorFactory.Create(plugin.GetType())
@@ -104,7 +103,7 @@ func (s *eventSender) execute(
 	return nil
 }
 
-func (s *eventSender) resend(event *postmanqv1.Event) error {
+func (s *eventSender) resend(event *postmanq.Event) error {
 	event.AttemptsCount++
 	executor := s.workflowExecutorFactory.Create(
 		temporal.WithWorkflowType(fmt.Sprintf("WorkflowType%s", s.pipeline.Queue)),

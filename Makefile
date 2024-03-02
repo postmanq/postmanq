@@ -59,3 +59,6 @@ infra_up:
 
 infra_down:
 	docker-compose -p $(DOCKER_PROJECT) -f $(DOCKER_COMPOSE_INFRA) down --remove-orphans
+
+buf_generate_1:
+	cd $(PROJECT_DIR)/pkg/postmanqfx && buf mod update && buf generate -v --debug --path proto/

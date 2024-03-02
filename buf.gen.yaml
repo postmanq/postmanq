@@ -1,7 +1,7 @@
 version: v1
 plugins:
 - name: go-patch
-  out: pkg/commonfx/gen
+  out: dist
   opt:
     - plugin=go
 - name: go-patch

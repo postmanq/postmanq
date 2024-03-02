@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/postmanq/postmanq/pkg/commonfx/collection"
 	"github.com/postmanq/postmanq/pkg/commonfx/configfx/config"
-	"github.com/postmanq/postmanq/pkg/commonfx/gen/postmanqv1"
 	"github.com/postmanq/postmanq/pkg/commonfx/logfx/log"
 	"github.com/postmanq/postmanq/pkg/plugins/smtpfx/smtp"
 	"github.com/postmanq/postmanq/pkg/postmanqfx/postmanq"
@@ -74,7 +73,7 @@ func (p *plugin) GetType() string {
 	return "ActivityTypeSMTP"
 }
 
-func (p *plugin) OnEvent(ctx context.Context, event *postmanqv1.Event) (*postmanqv1.Event, error) {
+func (p *plugin) OnEvent(ctx context.Context, event *postmanq.Event) (*postmanq.Event, error) {
 	email, err := p.emailParser.Parse(ctx, event.To)
 	if err != nil {
 		return nil, err

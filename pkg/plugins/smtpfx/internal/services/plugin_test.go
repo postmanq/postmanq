@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/postmanq/postmanq/pkg/commonfx/collection"
 	"github.com/postmanq/postmanq/pkg/commonfx/configfx/config_mock"
-	"github.com/postmanq/postmanq/pkg/commonfx/gen/postmanqv1"
 	"github.com/postmanq/postmanq/pkg/commonfx/logfx/log_mock"
 	"github.com/postmanq/postmanq/pkg/commonfx/testutils"
 	"github.com/postmanq/postmanq/pkg/plugins/smtpfx/internal/services"
@@ -64,7 +63,7 @@ func (s *PluginTestSuite) SetupSuite() {
 		s.parser,
 		dkimSignerFactory,
 	)
-	plugin, err := res.Descriptor.Construct(s.Ctx, provider)
+	plugin, err := res.Descriptor.Construct(s.Ctx, postmanq.Pipeline{}, provider)
 	s.Nil(err)
 
 	s.plugin = plugin.(postmanq.WorkflowPlugin)
@@ -134,7 +133,7 @@ func (s *PluginTestSuite) TestOnEvent() {
 				Domain:    domain,
 			}, nil)
 
-			_, err := s.plugin.OnEvent(s.Ctx, &postmanqv1.Event{
+			_, err := s.plugin.OnEvent(s.Ctx, &postmanq.Event{
 				Uuid: uuid.NewString(),
 				To:   email,
 			})

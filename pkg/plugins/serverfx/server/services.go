@@ -1,6 +1,9 @@
 package server
 
-import "context"
+import (
+	"context"
+	"github.com/postmanq/postmanq/pkg/postmanqfx/postmanq"
+)
 
 type Factory interface {
 	Create(ctx context.Context, cfg Config) (Server, error)
@@ -9,4 +12,8 @@ type Factory interface {
 type Server interface {
 	Register(descriptor Descriptor) error
 	Start() error
+}
+
+type EventServiceServerFactory interface {
+	Create(ctx context.Context, pipeline postmanq.Pipeline) EventServiceServer
 }

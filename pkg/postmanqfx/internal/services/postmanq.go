@@ -69,7 +69,7 @@ func (i invoker) Configure(ctx context.Context) error {
 					return err
 				}
 
-				plugin, err := descriptor.Construct(ctx, provider)
+				plugin, err := descriptor.Construct(ctx, *pipeline, provider)
 				if err != nil {
 					return err
 				}

@@ -9,7 +9,7 @@ var (
 	Module = fx.Module(
 		"server",
 		fx.Provide(
-			services.NewFxEventServiceServer,
+			services.NewFxEventServiceServerFactory,
 			services.NewFxUnionServerFactory,
 			services.NewFxPluginDescriptor,
 		),

@@ -3,7 +3,6 @@ package postmanq
 import (
 	"context"
 	"github.com/postmanq/postmanq/pkg/commonfx/configfx/config"
-	"github.com/postmanq/postmanq/pkg/commonfx/gen/postmanqv1"
 	"go.temporal.io/sdk/workflow"
 )
 
@@ -19,7 +18,7 @@ type ReceiverPlugin interface {
 type WorkflowPlugin interface {
 	Plugin
 	GetType() string
-	OnEvent(ctx context.Context, event *postmanqv1.Event) (*postmanqv1.Event, error)
+	OnEvent(ctx context.Context, event *Event) (*Event, error)
 }
 
 type EventSenderFactory interface {
@@ -27,7 +26,7 @@ type EventSenderFactory interface {
 }
 
 type EventSender interface {
-	SendEvent(ctx workflow.Context, event *postmanqv1.Event) (*postmanqv1.Event, error)
+	SendEvent(ctx workflow.Context, event *Event) (*Event, error)
 }
 
 type Invoker interface {

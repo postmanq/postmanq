@@ -13,7 +13,6 @@ import (
 	context "context"
 	reflect "reflect"
 
-	postmanqv1 "github.com/postmanq/postmanq/pkg/commonfx/gen/postmanqv1"
 	postmanq "github.com/postmanq/postmanq/pkg/postmanqfx/postmanq"
 	workflow "go.temporal.io/sdk/workflow"
 	gomock "go.uber.org/mock/gomock"
@@ -117,10 +116,10 @@ func (mr *MockWorkflowPluginMockRecorder) GetType() *gomock.Call {
 }
 
 // OnEvent mocks base method.
-func (m *MockWorkflowPlugin) OnEvent(ctx context.Context, event *postmanqv1.Event) (*postmanqv1.Event, error) {
+func (m *MockWorkflowPlugin) OnEvent(ctx context.Context, event *postmanq.Event) (*postmanq.Event, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "OnEvent", ctx, event)
-	ret0, _ := ret[0].(*postmanqv1.Event)
+	ret0, _ := ret[0].(*postmanq.Event)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -192,10 +191,10 @@ func (m *MockEventSender) EXPECT() *MockEventSenderMockRecorder {
 }
 
 // SendEvent mocks base method.
-func (m *MockEventSender) SendEvent(ctx workflow.Context, event *postmanqv1.Event) (*postmanqv1.Event, error) {
+func (m *MockEventSender) SendEvent(ctx workflow.Context, event *postmanq.Event) (*postmanq.Event, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendEvent", ctx, event)
-	ret0, _ := ret[0].(*postmanqv1.Event)
+	ret0, _ := ret[0].(*postmanq.Event)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
