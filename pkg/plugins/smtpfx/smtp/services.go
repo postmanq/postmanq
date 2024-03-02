@@ -27,13 +27,13 @@ type Client interface {
 }
 
 type EmailParser interface {
-	Parse(email string) (*EmailAddress, error)
+	Parse(ctx context.Context, email string) (*EmailAddress, error)
 }
 
 type DkimSignerFactory interface {
-	Create(cfg Config) (DkimSigner, error)
+	Create(ctx context.Context, cfg Config) (DkimSigner, error)
 }
 
 type DkimSigner interface {
-	Sign(data []byte) ([]byte, error)
+	Sign(ctx context.Context, data []byte) ([]byte, error)
 }

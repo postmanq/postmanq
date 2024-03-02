@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"github.com/postmanq/postmanq/pkg/plugins/smtpfx/smtp"
 	"regexp"
@@ -19,7 +20,7 @@ func NewFxEmailParser() smtp.EmailParser {
 type emailParser struct {
 }
 
-func (p emailParser) Parse(email string) (*smtp.EmailAddress, error) {
+func (p emailParser) Parse(ctx context.Context, email string) (*smtp.EmailAddress, error) {
 	if !rfc5322Regexp.MatchString(email) {
 		return nil, fmt.Errorf("%s has incorrect format", email)
 	}

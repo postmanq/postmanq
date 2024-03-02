@@ -58,7 +58,7 @@ func (s *DkimTestSuite) SetupTest() {
 }
 
 func (s *DkimTestSuite) TestCreateSigner() {
-	_, err := s.factory.Create(smtp.Config{
+	_, err := s.factory.Create(s.Ctx, smtp.Config{
 		TLS: &smtp.TLSConfig{
 			PrivateKey: randomdata.Alphanumeric(32),
 		},
@@ -68,7 +68,7 @@ func (s *DkimTestSuite) TestCreateSigner() {
 	_, err = s.privateKeyFile.WriteAt([]byte(randomdata.Alphanumeric(100)), 10)
 	s.Nil(err)
 
-	_, err = s.factory.Create(smtp.Config{
+	_, err = s.factory.Create(s.Ctx, smtp.Config{
 		TLS: &smtp.TLSConfig{
 			PrivateKey: s.privateKeyFile.Name(),
 		},
@@ -77,7 +77,7 @@ func (s *DkimTestSuite) TestCreateSigner() {
 }
 
 func (s *DkimTestSuite) TestSign() {
-	signer, err := s.factory.Create(smtp.Config{
+	signer, err := s.factory.Create(s.Ctx, smtp.Config{
 		Hostname:     "postmanq.io",
 		DkimSelector: "_dkim",
 		TLS: &smtp.TLSConfig{
@@ -87,12 +87,11 @@ func (s *DkimTestSuite) TestSign() {
 	s.NotNil(signer)
 	s.Nil(err)
 
-	_, err = signer.Sign([]byte(""))
+	_, err = signer.Sign(s.Ctx, []byte(""))
 	s.NotNil(err)
 
-	data, err := signer.Sign([]byte(mailData))
+	_, err = signer.Sign(s.Ctx, []byte(mailData))
 	s.Nil(err)
-	s.T().Log(string(data))
 }
 
 func (s *DkimTestSuite) TearDownTest() {

@@ -7,7 +7,7 @@ import (
 	"go.temporal.io/sdk/workflow"
 )
 
-type PluginConstruct func(ctx context.Context, provider config.Provider) (Plugin, error)
+type PluginConstruct func(ctx context.Context, pipeline Pipeline, provider config.Provider) (Plugin, error)
 
 type Plugin interface{}
 

@@ -24,7 +24,7 @@ func NewFxPluginDescriptor(
 			Name:       "smtp",
 			Kind:       postmanq.PluginKindSender,
 			MinVersion: 1.0,
-			Construct: func(ctx context.Context, provider config.Provider) (postmanq.Plugin, error) {
+			Construct: func(ctx context.Context, pipeline postmanq.Pipeline, provider config.Provider) (postmanq.Plugin, error) {
 				var cfg smtp.Config
 				err := provider.Populate(&cfg)
 				if err != nil {
@@ -36,7 +36,7 @@ func NewFxPluginDescriptor(
 					return nil, err
 				}
 
-				ds, err := dkimSignerFactory.Create(cfg)
+				ds, err := dkimSignerFactory.Create(ctx, cfg)
 				if err != nil {
 					return nil, err
 				}
@@ -75,7 +75,7 @@ func (p *plugin) GetType() string {
 }
 
 func (p *plugin) OnEvent(ctx context.Context, event *postmanqv1.Event) (*postmanqv1.Event, error) {
-	email, err := p.emailParser.Parse(event.To)
+	email, err := p.emailParser.Parse(ctx, event.To)
 	if err != nil {
 		return nil, err
 	}
@@ -107,6 +107,7 @@ func (p *plugin) OnEvent(ctx context.Context, event *postmanqv1.Event) (*postman
 
 createClient:
 	var cl smtp.Client
+	var data []byte
 
 	for _, server := range descriptor.Servers.Entries() {
 		for _, existsClient := range server.Clients.Entries() {
@@ -148,12 +149,12 @@ createClient:
 		return nil, err
 	}
 
-	event.Data, err = p.dkimSigner.Sign(event.Data)
+	data, err = p.dkimSigner.Sign(ctx, event.Data)
 	if err != nil {
 		return nil, err
 	}
 
-	err = cl.Data(ctx, event.Data)
+	err = cl.Data(ctx, data)
 	if err != nil {
 		return nil, err
 	}

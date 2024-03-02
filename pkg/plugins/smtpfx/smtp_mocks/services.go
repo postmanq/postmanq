@@ -55,3 +55,300 @@ func (mr *MockMxResolverMockRecorder) Resolve(ctx, domain any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Resolve", reflect.TypeOf((*MockMxResolver)(nil).Resolve), ctx, domain)
 }
+
+// MockClientBuilderFactory is a mock of ClientBuilderFactory interface.
+type MockClientBuilderFactory struct {
+	ctrl     *gomock.Controller
+	recorder *MockClientBuilderFactoryMockRecorder
+}
+
+// MockClientBuilderFactoryMockRecorder is the mock recorder for MockClientBuilderFactory.
+type MockClientBuilderFactoryMockRecorder struct {
+	mock *MockClientBuilderFactory
+}
+
+// NewMockClientBuilderFactory creates a new mock instance.
+func NewMockClientBuilderFactory(ctrl *gomock.Controller) *MockClientBuilderFactory {
+	mock := &MockClientBuilderFactory{ctrl: ctrl}
+	mock.recorder = &MockClientBuilderFactoryMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockClientBuilderFactory) EXPECT() *MockClientBuilderFactoryMockRecorder {
+	return m.recorder
+}
+
+// Create mocks base method.
+func (m *MockClientBuilderFactory) Create(ctx context.Context, cfg smtp.Config) (smtp.ClientBuilder, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", ctx, cfg)
+	ret0, _ := ret[0].(smtp.ClientBuilder)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockClientBuilderFactoryMockRecorder) Create(ctx, cfg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockClientBuilderFactory)(nil).Create), ctx, cfg)
+}
+
+// MockClientBuilder is a mock of ClientBuilder interface.
+type MockClientBuilder struct {
+	ctrl     *gomock.Controller
+	recorder *MockClientBuilderMockRecorder
+}
+
+// MockClientBuilderMockRecorder is the mock recorder for MockClientBuilder.
+type MockClientBuilderMockRecorder struct {
+	mock *MockClientBuilder
+}
+
+// NewMockClientBuilder creates a new mock instance.
+func NewMockClientBuilder(ctrl *gomock.Controller) *MockClientBuilder {
+	mock := &MockClientBuilder{ctrl: ctrl}
+	mock.recorder = &MockClientBuilderMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockClientBuilder) EXPECT() *MockClientBuilderMockRecorder {
+	return m.recorder
+}
+
+// Create mocks base method.
+func (m *MockClientBuilder) Create(ctx context.Context, hostname string) (smtp.Client, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", ctx, hostname)
+	ret0, _ := ret[0].(smtp.Client)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockClientBuilderMockRecorder) Create(ctx, hostname any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockClientBuilder)(nil).Create), ctx, hostname)
+}
+
+// MockClient is a mock of Client interface.
+type MockClient struct {
+	ctrl     *gomock.Controller
+	recorder *MockClientMockRecorder
+}
+
+// MockClientMockRecorder is the mock recorder for MockClient.
+type MockClientMockRecorder struct {
+	mock *MockClient
+}
+
+// NewMockClient creates a new mock instance.
+func NewMockClient(ctrl *gomock.Controller) *MockClient {
+	mock := &MockClient{ctrl: ctrl}
+	mock.recorder = &MockClientMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockClient) EXPECT() *MockClientMockRecorder {
+	return m.recorder
+}
+
+// Data mocks base method.
+func (m *MockClient) Data(ctx context.Context, data []byte) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Data", ctx, data)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Data indicates an expected call of Data.
+func (mr *MockClientMockRecorder) Data(ctx, data any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Data", reflect.TypeOf((*MockClient)(nil).Data), ctx, data)
+}
+
+// HasStatus mocks base method.
+func (m *MockClient) HasStatus(arg0 smtp.ClientStatus) bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "HasStatus", arg0)
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// HasStatus indicates an expected call of HasStatus.
+func (mr *MockClientMockRecorder) HasStatus(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasStatus", reflect.TypeOf((*MockClient)(nil).HasStatus), arg0)
+}
+
+// Hello mocks base method.
+func (m *MockClient) Hello(ctx context.Context, localName string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Hello", ctx, localName)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Hello indicates an expected call of Hello.
+func (mr *MockClientMockRecorder) Hello(ctx, localName any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Hello", reflect.TypeOf((*MockClient)(nil).Hello), ctx, localName)
+}
+
+// Mail mocks base method.
+func (m *MockClient) Mail(ctx context.Context, from string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Mail", ctx, from)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Mail indicates an expected call of Mail.
+func (mr *MockClientMockRecorder) Mail(ctx, from any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Mail", reflect.TypeOf((*MockClient)(nil).Mail), ctx, from)
+}
+
+// Noop mocks base method.
+func (m *MockClient) Noop() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Noop")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Noop indicates an expected call of Noop.
+func (mr *MockClientMockRecorder) Noop() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Noop", reflect.TypeOf((*MockClient)(nil).Noop))
+}
+
+// Rcpt mocks base method.
+func (m *MockClient) Rcpt(ctx context.Context, to string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Rcpt", ctx, to)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Rcpt indicates an expected call of Rcpt.
+func (mr *MockClientMockRecorder) Rcpt(ctx, to any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rcpt", reflect.TypeOf((*MockClient)(nil).Rcpt), ctx, to)
+}
+
+// MockEmailParser is a mock of EmailParser interface.
+type MockEmailParser struct {
+	ctrl     *gomock.Controller
+	recorder *MockEmailParserMockRecorder
+}
+
+// MockEmailParserMockRecorder is the mock recorder for MockEmailParser.
+type MockEmailParserMockRecorder struct {
+	mock *MockEmailParser
+}
+
+// NewMockEmailParser creates a new mock instance.
+func NewMockEmailParser(ctrl *gomock.Controller) *MockEmailParser {
+	mock := &MockEmailParser{ctrl: ctrl}
+	mock.recorder = &MockEmailParserMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockEmailParser) EXPECT() *MockEmailParserMockRecorder {
+	return m.recorder
+}
+
+// Parse mocks base method.
+func (m *MockEmailParser) Parse(ctx context.Context, email string) (*smtp.EmailAddress, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Parse", ctx, email)
+	ret0, _ := ret[0].(*smtp.EmailAddress)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Parse indicates an expected call of Parse.
+func (mr *MockEmailParserMockRecorder) Parse(ctx, email any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Parse", reflect.TypeOf((*MockEmailParser)(nil).Parse), ctx, email)
+}
+
+// MockDkimSignerFactory is a mock of DkimSignerFactory interface.
+type MockDkimSignerFactory struct {
+	ctrl     *gomock.Controller
+	recorder *MockDkimSignerFactoryMockRecorder
+}
+
+// MockDkimSignerFactoryMockRecorder is the mock recorder for MockDkimSignerFactory.
+type MockDkimSignerFactoryMockRecorder struct {
+	mock *MockDkimSignerFactory
+}
+
+// NewMockDkimSignerFactory creates a new mock instance.
+func NewMockDkimSignerFactory(ctrl *gomock.Controller) *MockDkimSignerFactory {
+	mock := &MockDkimSignerFactory{ctrl: ctrl}
+	mock.recorder = &MockDkimSignerFactoryMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockDkimSignerFactory) EXPECT() *MockDkimSignerFactoryMockRecorder {
+	return m.recorder
+}
+
+// Create mocks base method.
+func (m *MockDkimSignerFactory) Create(ctx context.Context, cfg smtp.Config) (smtp.DkimSigner, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", ctx, cfg)
+	ret0, _ := ret[0].(smtp.DkimSigner)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockDkimSignerFactoryMockRecorder) Create(ctx, cfg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockDkimSignerFactory)(nil).Create), ctx, cfg)
+}
+
+// MockDkimSigner is a mock of DkimSigner interface.
+type MockDkimSigner struct {
+	ctrl     *gomock.Controller
+	recorder *MockDkimSignerMockRecorder
+}
+
+// MockDkimSignerMockRecorder is the mock recorder for MockDkimSigner.
+type MockDkimSignerMockRecorder struct {
+	mock *MockDkimSigner
+}
+
+// NewMockDkimSigner creates a new mock instance.
+func NewMockDkimSigner(ctrl *gomock.Controller) *MockDkimSigner {
+	mock := &MockDkimSigner{ctrl: ctrl}
+	mock.recorder = &MockDkimSignerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockDkimSigner) EXPECT() *MockDkimSignerMockRecorder {
+	return m.recorder
+}
+
+// Sign mocks base method.
+func (m *MockDkimSigner) Sign(ctx context.Context, data []byte) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Sign", ctx, data)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Sign indicates an expected call of Sign.
+func (mr *MockDkimSignerMockRecorder) Sign(ctx, data any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Sign", reflect.TypeOf((*MockDkimSigner)(nil).Sign), ctx, data)
+}

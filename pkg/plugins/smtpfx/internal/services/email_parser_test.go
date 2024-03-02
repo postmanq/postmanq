@@ -24,11 +24,11 @@ func (s *EmailParserTestSuite) SetupSuite() {
 }
 
 func (s *EmailParserTestSuite) TestParse() {
-	email, err := s.emailParser.Parse(randomdata.Address())
+	email, err := s.emailParser.Parse(s.Ctx, randomdata.Address())
 	s.Nil(email)
 	s.NotNil(err)
 
-	email, err = s.emailParser.Parse(randomdata.Email())
+	email, err = s.emailParser.Parse(s.Ctx, randomdata.Email())
 	s.IsType(&smtp.EmailAddress{}, email)
 	s.Nil(err)
 }

@@ -2,6 +2,7 @@ package services
 
 import (
 	"bytes"
+	"context"
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
@@ -18,7 +19,7 @@ func NewFxDkimSignerFactory() smtp.DkimSignerFactory {
 type dkimSignerFactory struct {
 }
 
-func (d dkimSignerFactory) Create(cfg smtp.Config) (smtp.DkimSigner, error) {
+func (d dkimSignerFactory) Create(ctx context.Context, cfg smtp.Config) (smtp.DkimSigner, error) {
 	buf, err := os.ReadFile(cfg.TLS.PrivateKey)
 	if err != nil {
 		return nil, err
@@ -30,11 +31,6 @@ func (d dkimSignerFactory) Create(cfg smtp.Config) (smtp.DkimSigner, error) {
 	}
 
 	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-
-	err = privateKey.Validate()
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +48,7 @@ type dkimSigner struct {
 	opts *dkim.SignOptions
 }
 
-func (d dkimSigner) Sign(data []byte) ([]byte, error) {
+func (d dkimSigner) Sign(ctx context.Context, data []byte) ([]byte, error) {
 	var w bytes.Buffer
 	r := bytes.NewReader(data)
 
