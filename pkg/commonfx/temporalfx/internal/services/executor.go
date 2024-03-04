@@ -1,4 +1,4 @@
-package internal
+package services
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"go.temporal.io/sdk/workflow"
 )
 
-func NewFxWorkflowExecutorFactory[I any, O any](temporalClient temporal.Client) temporal.WorkflowExecutorFactory[I, O] {
+func NewWorkflowExecutorFactory[I any, O any](temporalClient temporal.Client) temporal.WorkflowExecutorFactory[I, O] {
 	return &workflowExecutorFactory[I, O]{
 		cl: temporalClient,
 	}
@@ -50,7 +50,7 @@ func (e *workflowExecutor[I, O]) Execute(ctx context.Context, in I) (O, error) {
 	return out, nil
 }
 
-func NewFxActivityExecutorFactory[I any, O any]() temporal.ActivityExecutorFactory[I, O] {
+func NewActivityExecutorFactory[I any, O any]() temporal.ActivityExecutorFactory[I, O] {
 	return &activityExecutorFactory[I, O]{}
 }
 

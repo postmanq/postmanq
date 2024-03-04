@@ -32,6 +32,7 @@ func NewFxPluginDescriptor(
 					server: srv,
 					descriptor: server.Descriptor{
 						Server:               eventServiceServerFactory.Create(ctx, pipeline),
+						GRPCRegistrar:        server.RegisterEventServiceServer,
 						GRPCGatewayRegistrar: server.RegisterEventServiceHandlerFromEndpoint,
 					},
 				}, nil

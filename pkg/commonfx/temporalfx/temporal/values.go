@@ -14,7 +14,8 @@ var (
 )
 
 type Config struct {
-	Address string `yaml:"address"`
+	Host string `yaml:"host"`
+	Port string `yaml:"port"`
 }
 
 type Context workflow.Context

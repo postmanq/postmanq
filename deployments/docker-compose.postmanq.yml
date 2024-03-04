@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  postmanq:
+    build:
+      context: ..
+      dockerfile: ${PROJECT_DIR}/deployments/Dockerfile
+    env_file:
+      - ${PROJECT_DIR}/.env

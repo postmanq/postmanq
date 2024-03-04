@@ -30,7 +30,7 @@ type clientBuilderFactory struct {
 func (c clientBuilderFactory) Create(ctx context.Context, cfg smtp.Config) (smtp.ClientBuilder, error) {
 	var tlsCfg *tls.Config
 
-	if cfg.TLS != nil {
+	if cfg.TLS != nil && (len(cfg.TLS.Certificate) > 0 && len(cfg.TLS.PrivateKey) > 0) {
 		tlsCfg = &tls.Config{
 			ClientAuth: tls.RequireAndVerifyClientCert,
 			CipherSuites: []uint16{

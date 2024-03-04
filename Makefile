@@ -7,11 +7,12 @@ DOCKER_DIR=$(PROJECT_DIR)/deployments
 DOCKER_PROJECT=postmanq
 DOCKER_COMPOSE=$(DOCKER_DIR)/docker-compose.yml
 DOCKER_COMPOSE_INFRA=$(DOCKER_DIR)/docker-compose.infra.yml
+DOCKER_COMPOSE_POSTMANQ=$(DOCKER_DIR)/docker-compose.postmanq.yml
 
 PLUGINS=$(shell ls -d $(PLUGIN_DIR)/*)
 
 GOCMD=go
-GOBUILD=$(GOCMD) build -ldflags="-extldflags=-Wl,-ld_classic"
+GOBUILD=CGO_ENABLED=1 go build
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
 
@@ -46,11 +47,11 @@ build_plugins:
 build_postmanq:
 	$(GOBUILD) -o $(DIST_DIR)/postmanq $(PROJECT_DIR)/cmd/postmanq/main.go
 
-run: build_plugins build_postmanq
-	$(DIST_DIR)/postmanq -c $(PROJECT_DIR)/config.yml
-
 infra_up:
 	docker-compose -p $(DOCKER_PROJECT) -f $(DOCKER_COMPOSE_INFRA) up -d --force-recreate
 
 infra_down:
 	docker-compose -p $(DOCKER_PROJECT) -f $(DOCKER_COMPOSE_INFRA) down --remove-orphans
+
+postmanq_up:
+	docker-compose -p $(DOCKER_PROJECT) -f $(DOCKER_COMPOSE_POSTMANQ) up -d --build --force-recreate

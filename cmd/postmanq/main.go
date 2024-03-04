@@ -17,7 +17,7 @@ func main() {
 		ctx context.Context,
 		invoker postmanq.Invoker,
 	) error {
-		err := invoker.Configure()
+		err := invoker.Configure(ctx)
 		if err != nil {
 			return err
 		}

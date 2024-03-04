@@ -1,6 +1,6 @@
 .idea
 .env
 vendor
-config.yml
+configs/config.yml
 test.go
 dist/

@@ -1,6 +1,7 @@
-package internal
+package services
 
 import (
+	"fmt"
 	"github.com/postmanq/postmanq/pkg/commonfx/configfx/config"
 	"github.com/postmanq/postmanq/pkg/commonfx/logfx/log"
 	"github.com/postmanq/postmanq/pkg/commonfx/temporalfx/temporal"
@@ -12,13 +13,13 @@ func NewFxClient(
 	configProvider config.Provider,
 ) (temporal.Client, error) {
 	cfg := new(temporal.Config)
-	err := configProvider.PopulateByKey("temporal.client", cfg)
+	err := configProvider.PopulateByKey("temporal", cfg)
 	if err != nil {
 		return nil, err
 	}
 
 	opts := client.Options{
-		HostPort: cfg.Address,
+		HostPort: fmt.Sprintf("%s:%s", cfg.Host, cfg.Port),
 		Logger:   &logAdapter{logger.Named("tw_client")},
 		ConnectionOptions: client.ConnectionOptions{
 			MaxPayloadSize: 2097152 * 50,

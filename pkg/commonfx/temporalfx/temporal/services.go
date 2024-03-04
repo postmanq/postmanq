@@ -175,22 +175,6 @@ func WithRetryPolicy(initialInterval time.Duration, maximumAttempts int32) Workf
 	})
 }
 
-type withChunkSize uint32
-
-func (w withChunkSize) Apply(o *WorkflowSettings) {
-	o.ChunkSize = uint32(w)
-}
-
-func WithChunkSize(chunkSize uint32) WorkflowOption {
-	return withChunkSize(chunkSize)
-}
-
-type withStartSignal Signal
-
-func (w withStartSignal) Apply(o *WorkflowSettings) {
-	o.StartSignal = Signal(w)
-}
-
 type withStartDelay time.Duration
 
 func (w withStartDelay) Apply(o *WorkflowSettings) {

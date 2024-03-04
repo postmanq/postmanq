@@ -32,6 +32,7 @@ type App struct {
 }
 
 func (a *App) Run(invoker interface{}) {
+	log.Println("postmanq started")
 	var args Arguments
 	_, err := flags.Parse(&args)
 	if err != nil {
@@ -52,17 +53,20 @@ func (a *App) Run(invoker interface{}) {
 	}
 
 	for _, file := range files {
+		log.Printf("try to open plugin %s/%s\n", args.ModuleDir, file.Name())
 		moduleName := fmt.Sprintf("%s/%s", args.ModuleDir, file.Name())
 		plug, err := plugin.Open(moduleName)
 		if err != nil {
 			log.Fatal(err)
 		}
 
+		log.Println("try to lookup plugin")
 		symbol, err := plug.Lookup(ModuleSymName)
 		if err != nil {
 			log.Fatal(err)
 		}
 
+		log.Println("plugin found")
 		module, ok := symbol.(*fx.Option)
 		if !ok {
 			log.Fatal(fmt.Errorf("can`t cast symbol=%T to module.PluginConstruct in mudule %s", symbol, moduleName))
