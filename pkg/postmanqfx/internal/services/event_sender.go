@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/postmanq/postmanq/pkg/commonfx/collection"
 	"github.com/postmanq/postmanq/pkg/commonfx/logfx/log"
 	"github.com/postmanq/postmanq/pkg/commonfx/temporalfx/temporal"
@@ -56,6 +55,11 @@ type eventSender struct {
 }
 
 func (s *eventSender) SendEvent(ctx workflow.Context, event *postmanq.Event) (*postmanq.Event, error) {
+	ctx = temporal.WithActivityOptions(ctx, temporal.NewActivityOptions(
+		temporal.WithStartToCloseTimeout(time.Minute*30),
+		temporal.WithRetryPolicy(time.Second*5, 3),
+	))
+
 	err := s.executeOrResend(ctx, s.pipeline.Middlewares, event)
 	if err != nil {
 		return nil, err
@@ -105,16 +109,16 @@ func (s *eventSender) execute(
 
 func (s *eventSender) resend(event *postmanq.Event) error {
 	event.AttemptsCount++
-	executor := s.workflowExecutorFactory.Create(
-		temporal.WithWorkflowType(fmt.Sprintf("WorkflowType%s", s.pipeline.Queue)),
-		temporal.WithWorkflowID(fmt.Sprintf("WorkflowType%s_%s_%d", s.pipeline.Queue, event.Uuid, event.AttemptsCount)),
-		temporal.WithWorkflowExecutionTimeout(time.Minute),
-		temporal.WithStartDelay(time.Duration(event.AttemptsCount)*time.Hour),
-	)
-	_, err := executor.Execute(s.ctx, event)
-	if err != nil {
-		return err
-	}
+	//executor := s.workflowExecutorFactory.Create(
+	//	temporal.WithWorkflowType(fmt.Sprintf("WorkflowType%s", s.pipeline.Queue)),
+	//	temporal.WithWorkflowID(fmt.Sprintf("WorkflowType%s_%s_%d", s.pipeline.Queue, event.Uuid, event.AttemptsCount)),
+	//	temporal.WithWorkflowExecutionTimeout(time.Minute),
+	//	temporal.WithStartDelay(time.Duration(event.AttemptsCount)*time.Hour),
+	//)
+	//_, err := executor.Execute(s.ctx, event)
+	//if err != nil {
+	//	return err
+	//}
 
 	return nil
 }

@@ -6,7 +6,6 @@ import (
 	"github.com/postmanq/postmanq/pkg/commonfx/logfx/log"
 	"github.com/postmanq/postmanq/pkg/plugins/smtpfx/smtp"
 	"net"
-	"strings"
 	"time"
 )
 
@@ -46,17 +45,18 @@ func (m *mxResolver) Resolve(ctx context.Context, domain string) (collection.Sli
 }
 
 func (m *mxResolver) resolveRealHostname(hostname string) string {
-	parts := strings.Split(hostname, ".")
-	partsLen := len(parts)
-	hostname = strings.Join(parts[partsLen-3:partsLen-1], ".")
-	mxes, err := net.LookupMX(hostname)
-	if err == nil && len(mxes) >= 1 {
-		if strings.Contains(mxes[0].Host, hostname) {
-			return hostname
-		} else {
-			return m.resolveRealHostname(mxes[0].Host)
-		}
-	} else {
-		return hostname
-	}
+	return hostname
+	//parts := strings.Split(hostname, ".")
+	//partsLen := len(parts)
+	//hostname = strings.Join(parts[partsLen-3:partsLen-1], ".")
+	//mxes, err := net.LookupMX(hostname)
+	//if err == nil && len(mxes) >= 1 {
+	//	if strings.Contains(mxes[0].Host, hostname) {
+	//		return hostname
+	//	} else {
+	//		return m.resolveRealHostname(mxes[0].Host)
+	//	}
+	//} else {
+	//	return hostname
+	//}
 }

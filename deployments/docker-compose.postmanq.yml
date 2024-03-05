@@ -7,3 +7,6 @@ services:
       dockerfile: ${PROJECT_DIR}/deployments/Dockerfile
     env_file:
       - ${PROJECT_DIR}/.env
+    ports:
+      - "8181:8181"
+      - "8282:8282"

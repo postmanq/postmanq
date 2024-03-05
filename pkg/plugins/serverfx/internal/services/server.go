@@ -8,6 +8,7 @@ import (
 	"github.com/postmanq/postmanq/pkg/plugins/serverfx/server"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/encoding/protojson"
 	"net"
 	"net/http"
 	"reflect"
@@ -29,7 +30,14 @@ func (f *unionServerFactory) Create(ctx context.Context, cfg server.Config) (ser
 		cfg:        cfg,
 		logger:     f.logger,
 		grpcServer: grpc.NewServer(),
-		mux:        runtime.NewServeMux(),
+		mux: runtime.NewServeMux(
+			runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
+				MarshalOptions: protojson.MarshalOptions{
+					UseProtoNames: true,
+				},
+				UnmarshalOptions: protojson.UnmarshalOptions{},
+			}),
+		),
 		opts: []grpc.DialOption{
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		},

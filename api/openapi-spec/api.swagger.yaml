@@ -22,37 +22,11 @@ paths:
           schema:
             $ref: '#/definitions/Status'
       parameters:
-        - name: uuid
-          in: query
-          required: false
-          type: string
-        - name: attempts_count
-          in: query
-          required: false
-          type: integer
-          format: int64
-        - name: from
-          in: query
-          required: false
-          type: string
-        - name: to
-          in: query
-          required: false
-          type: string
-        - name: data
-          in: query
-          required: false
-          type: string
-          format: byte
-        - name: template
-          in: query
-          required: false
-          type: string
-        - name: vars[string]
-          description: This is a request variable of the map type. The query format is "map_name[key]=value", e.g. If the map name is Age, the key type is string, and the value type is integer, the query parameter is expressed as Age["bob"]=18
-          in: query
-          required: false
-          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Event'
       tags:
         - EventService
 definitions:
@@ -79,7 +53,7 @@ definitions:
         format: byte
       template:
         type: string
-      vars[string]:
+      vars:
         type: object
         additionalProperties:
           type: string

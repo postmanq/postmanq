@@ -15,7 +15,7 @@ func NewFxEventServiceServerFactory(
 	workflowExecutorFactory temporal.WorkflowExecutorFactory[*postmanq.Event, *postmanq.Event],
 ) server.EventServiceServerFactory {
 	return &eventServiceServerFactory{
-		logger:                  logger,
+		logger:                  logger.Named("server"),
 		workflowExecutorFactory: workflowExecutorFactory,
 	}
 }
@@ -40,6 +40,8 @@ type eventServiceServer struct {
 }
 
 func (s *eventServiceServer) ReceiveEvent(ctx context.Context, event *postmanq.Event) (*postmanq.Event, error) {
+	s.logger.Debug(event.String())
+	fmt.Println(event)
 	executor := s.workflowExecutorFactory.Create(
 		temporal.WithWorkflowType(fmt.Sprintf("WorkflowType%s", s.pipeline.Queue)),
 		temporal.WithWorkflowID(fmt.Sprintf("WorkflowType%s_%s_%d", s.pipeline.Queue, event.Uuid, event.AttemptsCount)),

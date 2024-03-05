@@ -166,6 +166,7 @@ type withRetryPolicy temporal.RetryPolicy
 func (w withRetryPolicy) Apply(o *WorkflowSettings) {
 	policy := temporal.RetryPolicy(w)
 	o.StartWorkflowOptions.RetryPolicy = &policy
+	o.ActivityOptions.RetryPolicy = &policy
 }
 
 func WithRetryPolicy(initialInterval time.Duration, maximumAttempts int32) WorkflowOption {
@@ -183,6 +184,20 @@ func (w withStartDelay) Apply(o *WorkflowSettings) {
 
 func WithStartDelay(duration time.Duration) WorkflowOption {
 	return withStartDelay(duration)
+}
+
+func NewActivityOptions(options ...WorkflowOption) ActivityOptions {
+	settings := &WorkflowSettings{}
+
+	for _, o := range options {
+		o.Apply(settings)
+	}
+
+	return settings.ActivityOptions
+}
+
+func WithActivityOptions(ctx workflow.Context, opts ActivityOptions) workflow.Context {
+	return workflow.WithActivityOptions(ctx, workflow.ActivityOptions(opts))
 }
 
 var InterruptCh = func() <-chan interface{} {
