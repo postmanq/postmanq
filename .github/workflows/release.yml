@@ -6,7 +6,7 @@ jobs:
     strategy:
       matrix:
         goos: [linux]
-        goarch: [amd64]
+        goarch: [amd64, arm64]
 #        goos: [linux, windows, darwin]
 #        goarch: ["386", amd64, arm64]
     steps:
@@ -15,18 +15,12 @@ jobs:
     - name: Setup Go
       uses: actions/setup-go@v4
     - name: Build PostmanQ
-      run: |
-        #sudo apt-get install -y build-essential gcc-multilib
-        cp -f .env.dist .env
-        make build_postmanq
-#    - name: Print environment
-#      uses: managedkaos/print-env@v1.0
-#    - name: Build PostmanQ
-#      uses: wangyoucao577/go-release-action@v1
-#      with:
-#        github_token: ${{ secrets.GITHUB_TOKEN }}
-#        goos: ${{ matrix.goos }}
-#        goarch: ${{ matrix.goarch }}
-#        build_command: "make build_postmanq"
-#        binary_name: "postmanq"
-#        compress_assets: OFF
+      env:
+        GOOS: ${{ matrix.goos }}
+        GOARCH: ${{ matrix.goarch }}
+      run: make build_postmanq
+    - name: Build PostmanQ plugins
+      run: make build_plugins
+      env:
+        GOOS: ${{ matrix.goos }}
+        GOARCH: ${{ matrix.goarch }}
