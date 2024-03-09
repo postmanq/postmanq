@@ -1,0 +1,20 @@
+on: [push]
+jobs:
+  release-postmanq:
+    name: Release PostmanQ
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux]
+        goarch: ["386"]
+#        goos: [linux, windows, darwin]
+#        goarch: ["386", amd64, arm64]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: wangyoucao577/go-release-action@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        goos: ${{ matrix.goos }}
+        goarch: ${{ matrix.goarch }}
+        build_command: "make"
+        build_flags: "build_postmanq"
