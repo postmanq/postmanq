@@ -40,8 +40,6 @@ buf_generate:
 	rm -rf $(DIST_DIR)/github.com
 
 build_plugins:
-	rm -rf $(DIST_PLUGIN_DIR)
-	mkdir -p $(DIST_PLUGIN_DIR)
 	$(foreach PLUGIN, $(PLUGINS), $(GOBUILD) -buildmode=plugin -o $(DIST_PLUGIN_DIR)/$(shell basename $(PLUGIN)).so $(PLUGIN_DIR)/$(shell basename $(PLUGIN))/module.go;)
 
 build_postmanq: deps
