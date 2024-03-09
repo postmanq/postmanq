@@ -6,7 +6,7 @@ jobs:
     strategy:
       matrix:
         goos: [linux, darwin, freebsd]
-        goarch: ["386", amd64, arm64]
+        goarch: [386, amd64, arm64]
         exclude:
         - goos: freebsd
           goarch: arm64
@@ -27,6 +27,7 @@ jobs:
       env:
         GOOS: ${{ matrix.goos }}
         GOARCH: ${{ matrix.goarch }}
+        CGO_ENABLED: 1
       run: make build
     - name: Release postmanq
       uses: softprops/action-gh-release@v2

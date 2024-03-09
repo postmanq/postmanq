@@ -12,8 +12,8 @@ DOCKER_COMPOSE_POSTMANQ=$(DOCKER_DIR)/docker-compose.postmanq.yml
 PLUGINS=$(shell ls -d $(PLUGIN_DIR)/*)
 
 GOCMD=go
-#GOBUILD=CGO_ENABLED=1 go build
 GOBUILD=go build
+#GOBUILD=go build -ldflags="-extldflags=-Wl,-ld_classic"
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
 
