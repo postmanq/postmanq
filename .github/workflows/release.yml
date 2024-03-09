@@ -12,9 +12,11 @@ jobs:
     steps:
     - name: Checkout repo
       uses: actions/checkout@v4
+    - name: Setup Go
+      uses: actions/setup-go@v4
     - name: Create .env
       run: |
-        sudo apt-get install -y build-essential gcc-multilib
+        #sudo apt-get install -y build-essential gcc-multilib
         cp -f .env.dist .env
     - name: Print environment
       uses: managedkaos/print-env@v1.0
