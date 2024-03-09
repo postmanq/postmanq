@@ -44,7 +44,7 @@ build_plugins:
 	mkdir -p $(DIST_PLUGIN_DIR)
 	$(foreach PLUGIN, $(PLUGINS), $(GOBUILD) -buildmode=plugin -o $(DIST_PLUGIN_DIR)/$(shell basename $(PLUGIN)).so $(PLUGIN_DIR)/$(shell basename $(PLUGIN))/module.go;)
 
-build_postmanq:
+build_postmanq: deps
 	$(GOBUILD) -o $(DIST_DIR)/postmanq $(PROJECT_DIR)/cmd/postmanq/main.go
 
 infra_up:
