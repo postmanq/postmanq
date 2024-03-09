@@ -8,8 +8,10 @@ jobs:
         goos: [linux, darwin, freebsd]
         goarch: ["386", amd64, arm, arm64]
         exclude:
-          - goos: freebsd
-            goarch: arm64
+        - goos: freebsd
+          goarch: arm64
+        - goos: darwin
+          goarch: 386
     steps:
     - name: Checkout repo
       uses: actions/checkout@v4
