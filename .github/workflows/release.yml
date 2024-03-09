@@ -15,6 +15,8 @@ jobs:
     - name: Create .env
       run: |
         cp -f .env.dist .env
+    - name: Print environment
+      uses: managedkaos/print-env@v1.0
     - name: Build PostmanQ
       uses: wangyoucao577/go-release-action@v1
       with:
@@ -24,3 +26,4 @@ jobs:
         build_command: "make"
         build_flags: "build_postmanq"
         binary_name: "postmanq"
+        compress_assets: OFF
