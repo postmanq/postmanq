@@ -68,6 +68,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: postmanq
+          path: dist
       - name: Release PostmanQ
         uses: softprops/action-gh-release@v2
         with:
