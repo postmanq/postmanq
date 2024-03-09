@@ -1,40 +1,79 @@
 on: [push]
 jobs:
-  release-postmanq:
+#  release-postmanq:
+#    name: Release PostmanQ
+#    runs-on: ubuntu-latest
+#    strategy:
+#      matrix:
+##        goos: [linux, darwin, freebsd]
+##        goarch: [386, amd64, arm64]
+#        goos: [linux]
+#        goarch: [amd64]
+#        exclude:
+#        - goos: freebsd
+#          goarch: arm64
+#        - goos: freebsd
+#          goarch: 386
+#        - goos: darwin
+#          goarch: 386
+#        - goos: darwin
+#          goarch: amd64
+#        - goos: linux
+#          goarch: arm64
+#    steps:
+#    - name: Checkout repo
+#      uses: actions/checkout@v4
+#    - name: Setup Go
+#      uses: actions/setup-go@v4
+#    - name: Build PostmanQ
+#      env:
+#        GOOS: ${{ matrix.goos }}
+#        GOARCH: ${{ matrix.goarch }}
+#        CGO_ENABLED: 1
+#      run: make build
+#    - name: Release postmanq
+#      uses: softprops/action-gh-release@v2
+#      with:
+#        tag_name: 0.0.1
+#        files: |
+#          dist/*
+#          dist/plugins/*
+  build-linux:
+    name: Build PostmanQ on Linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v4
+      - name: Build PostmanQ
+#        env:
+#          GOOS: ${{ matrix.goos }}
+#          GOARCH: ${{ matrix.goarch }}
+#          CGO_ENABLED: 1
+        run: make build
+      - name: Upload linux binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: postmanq
+          path: dist/*
+
+  release:
     name: Release PostmanQ
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-#        goos: [linux, darwin, freebsd]
-#        goarch: [386, amd64, arm64]
-        goos: [linux]
-        goarch: [amd64, 386]
-        exclude:
-        - goos: freebsd
-          goarch: arm64
-        - goos: freebsd
-          goarch: 386
-        - goos: darwin
-          goarch: 386
-        - goos: darwin
-          goarch: amd64
-        - goos: linux
-          goarch: arm64
+    needs:
+    - build-linux
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
-    - name: Setup Go
-      uses: actions/setup-go@v4
-    - name: Build PostmanQ
-      env:
-        GOOS: ${{ matrix.goos }}
-        GOARCH: ${{ matrix.goarch }}
-        CGO_ENABLED: 1
-      run: make build
-    - name: Release postmanq
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: 0.0.1
-        files: |
-          dist/*
-          dist/plugins/*
+      - name: Download binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: postmanq
+      - name: Release PostmanQ
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: 0.0.1
+          files: |
+            dist/*
+#          files: |
+#            dist/*
+#            dist/plugins/*
