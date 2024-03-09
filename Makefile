@@ -12,7 +12,8 @@ DOCKER_COMPOSE_POSTMANQ=$(DOCKER_DIR)/docker-compose.postmanq.yml
 PLUGINS=$(shell ls -d $(PLUGIN_DIR)/*)
 
 GOCMD=go
-GOBUILD=CGO_ENABLED=1 go build
+#GOBUILD=CGO_ENABLED=1 go build
+GOBUILD=go build
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
 
@@ -40,10 +41,12 @@ buf_generate:
 	rm -rf $(DIST_DIR)/github.com
 
 build_plugins:
-	$(foreach PLUGIN, $(PLUGINS), $(GOBUILD) -buildmode=plugin -o $(DIST_PLUGIN_DIR)/$(shell basename $(PLUGIN)).so $(PLUGIN_DIR)/$(shell basename $(PLUGIN))/module.go;)
+	$(foreach PLUGIN, $(PLUGINS), $(GOBUILD) -buildmode=plugin -o $(DIST_PLUGIN_DIR)/$(shell basename $(PLUGIN))-$(GOOS)-$(GOARCH) $(PLUGIN_DIR)/$(shell basename $(PLUGIN))/module.go;)
 
-build_postmanq: deps
-	$(GOBUILD) -o $(DIST_DIR)/postmanq $(PROJECT_DIR)/cmd/postmanq/main.go
+build_postmanq:
+	$(GOBUILD) -o $(DIST_DIR)/postmanq-$(GOOS)-$(GOARCH) $(PROJECT_DIR)/cmd/postmanq/main.go
+
+build: deps build_postmanq build_plugins
 
 infra_up:
 	docker-compose -p $(DOCKER_PROJECT) -f $(DOCKER_COMPOSE_INFRA) up -d --force-recreate

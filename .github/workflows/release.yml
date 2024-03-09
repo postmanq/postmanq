@@ -5,10 +5,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goos: [linux]
-        goarch: [amd64]
-#        goos: [linux, windows, darwin]
-#        goarch: ["386", amd64, arm64]
+        goos: [linux, darwin, freebsd]
+        goarch: ["386", amd64, arm, arm64]
+        exclude:
+          - os: freebsd
+            version: arm64
     steps:
     - name: Checkout repo
       uses: actions/checkout@v4
@@ -18,21 +19,9 @@ jobs:
       env:
         GOOS: ${{ matrix.goos }}
         GOARCH: ${{ matrix.goarch }}
-      run: make build_postmanq
-    - name: Build PostmanQ plugins
-      run: make build_plugins
-      env:
-        GOOS: ${{ matrix.goos }}
-        GOARCH: ${{ matrix.goarch }}
-#    - name: Upload binaries files
-#      uses: actions/upload-artifact@v4
-#      with:
-#        path: dist
-#        overwrite: true
+      run: make build
     - name: Release postmanq
       uses: softprops/action-gh-release@v2
       with:
         tag_name: 0.0.1
-        files: |
-          dist/postmanq
-          dist/plugins/*
+        files: dist/*
