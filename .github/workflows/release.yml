@@ -14,28 +14,23 @@ jobs:
     name: Build PostmanQ
     strategy:
       matrix:
-        runner:
-          - os: ubuntu-latest
-            goos: linux
-            goarch: amd64
-          - os: macos-latest
-            goos: darwin
-            goarch: arm64
-    runs-on: ${matrix.runner.os}
+        os: [ubuntu, darwin]
+    runs-on: ${matrix.os}-latest
+    environment: ${matrix.os}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
       - name: Setup go
         uses: actions/setup-go@v4
       - name: Build PostmanQ
-        env:
-          GOOS: ${matrix.runner.goos}
-          GOARCH: ${matrix.runner.goarch}
+#        env:
+#          GOOS: ${matrix.runner.goos}
+#          GOARCH: ${matrix.runner.goarch}
         run: make build
       - name: Upload linux binaries
         uses: actions/upload-artifact@v4
         with:
-          name: postmanq-${matrix.runner.goos}
+          name: postmanq-${matrix.os}
           path: |
             dist/*
             dist/plugins/*

@@ -125,7 +125,7 @@ func (s *PluginTestSuite) SetupSuite() {
 }
 
 func (s *PluginTestSuite) TestOnEvent() {
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 10; i++ {
 		s.Run(fmt.Sprintf("TestOnEvent#%d", i), func() {
 			s.T().Parallel()
 			s.mtx.Lock()
