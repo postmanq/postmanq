@@ -15,8 +15,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu, darwin]
-    runs-on: ${matrix.os}-latest
-    environment: ${matrix.os}
+    runs-on: ${{ matrix.os }}-latest
+    environment: ${{ matrix.os}}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -30,7 +30,7 @@ jobs:
       - name: Upload linux binaries
         uses: actions/upload-artifact@v4
         with:
-          name: postmanq-${matrix.os}
+          name: postmanq-${{ matrix.os }}
           path: |
             dist/*
             dist/plugins/*
