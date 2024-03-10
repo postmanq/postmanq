@@ -1,15 +1,15 @@
 on: [ push ]
 jobs:
-  #  test:
-  #    name: Test PostmanQ
-  #    runs-on: ubuntu-latest
-  #    steps:
-  #      - name: Checkout repo
-  #        uses: actions/checkout@v4
-  #      - name: Setup go
-  #        uses: actions/setup-go@v4
-  #      - name: Test PostmanQ
-  #        run: make test
+  test:
+    name: Test PostmanQ
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Setup go
+        uses: actions/setup-go@v4
+      - name: Test PostmanQ
+        run: make test
   build:
     name: Build PostmanQ
     strategy:
@@ -22,6 +22,8 @@ jobs:
             goos: darwin
             goarch: arm64
     runs-on: ${{ matrix.runner.os }}
+    needs:
+      - test
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -54,7 +56,7 @@ jobs:
       - name: Release PostmanQ
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: 0.0.1
+          tag_name: 0.0.2
           files: |
             dist/*
             dist/plugins/*
