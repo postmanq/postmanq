@@ -356,6 +356,44 @@ func (mr *MockWorkflowExecutorMockRecorder[I, O]) Execute(ctx, in any) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockWorkflowExecutor[I, O])(nil).Execute), ctx, in)
 }
 
+// MockEventExecutor is a mock of EventExecutor interface.
+type MockEventExecutor[I any, O any] struct {
+	ctrl     *gomock.Controller
+	recorder *MockEventExecutorMockRecorder[I, O]
+}
+
+// MockEventExecutorMockRecorder is the mock recorder for MockEventExecutor.
+type MockEventExecutorMockRecorder[I any, O any] struct {
+	mock *MockEventExecutor[I, O]
+}
+
+// NewMockEventExecutor creates a new mock instance.
+func NewMockEventExecutor[I any, O any](ctrl *gomock.Controller) *MockEventExecutor[I, O] {
+	mock := &MockEventExecutor[I, O]{ctrl: ctrl}
+	mock.recorder = &MockEventExecutorMockRecorder[I, O]{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockEventExecutor[I, O]) EXPECT() *MockEventExecutorMockRecorder[I, O] {
+	return m.recorder
+}
+
+// Execute mocks base method.
+func (m *MockEventExecutor[I, O]) Execute(ctx workflow.Context, in I) (O, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Execute", ctx, in)
+	ret0, _ := ret[0].(O)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Execute indicates an expected call of Execute.
+func (mr *MockEventExecutorMockRecorder[I, O]) Execute(ctx, in any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockEventExecutor[I, O])(nil).Execute), ctx, in)
+}
+
 // MockActivityExecutorFactory is a mock of ActivityExecutorFactory interface.
 type MockActivityExecutorFactory[I any, O any] struct {
 	ctrl     *gomock.Controller
@@ -380,10 +418,10 @@ func (m *MockActivityExecutorFactory[I, O]) EXPECT() *MockActivityExecutorFactor
 }
 
 // Create mocks base method.
-func (m *MockActivityExecutorFactory[I, O]) Create(activityType string) temporal.ActivityExecutor[I, O] {
+func (m *MockActivityExecutorFactory[I, O]) Create(activityType string) temporal.EventExecutor[I, O] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", activityType)
-	ret0, _ := ret[0].(temporal.ActivityExecutor[I, O])
+	ret0, _ := ret[0].(temporal.EventExecutor[I, O])
 	return ret0
 }
 
@@ -393,40 +431,43 @@ func (mr *MockActivityExecutorFactoryMockRecorder[I, O]) Create(activityType any
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockActivityExecutorFactory[I, O])(nil).Create), activityType)
 }
 
-// MockActivityExecutor is a mock of ActivityExecutor interface.
-type MockActivityExecutor[I any, O any] struct {
+// MockChildWorkflowExecutorFactory is a mock of ChildWorkflowExecutorFactory interface.
+type MockChildWorkflowExecutorFactory[I any, O any] struct {
 	ctrl     *gomock.Controller
-	recorder *MockActivityExecutorMockRecorder[I, O]
+	recorder *MockChildWorkflowExecutorFactoryMockRecorder[I, O]
 }
 
-// MockActivityExecutorMockRecorder is the mock recorder for MockActivityExecutor.
-type MockActivityExecutorMockRecorder[I any, O any] struct {
-	mock *MockActivityExecutor[I, O]
+// MockChildWorkflowExecutorFactoryMockRecorder is the mock recorder for MockChildWorkflowExecutorFactory.
+type MockChildWorkflowExecutorFactoryMockRecorder[I any, O any] struct {
+	mock *MockChildWorkflowExecutorFactory[I, O]
 }
 
-// NewMockActivityExecutor creates a new mock instance.
-func NewMockActivityExecutor[I any, O any](ctrl *gomock.Controller) *MockActivityExecutor[I, O] {
-	mock := &MockActivityExecutor[I, O]{ctrl: ctrl}
-	mock.recorder = &MockActivityExecutorMockRecorder[I, O]{mock}
+// NewMockChildWorkflowExecutorFactory creates a new mock instance.
+func NewMockChildWorkflowExecutorFactory[I any, O any](ctrl *gomock.Controller) *MockChildWorkflowExecutorFactory[I, O] {
+	mock := &MockChildWorkflowExecutorFactory[I, O]{ctrl: ctrl}
+	mock.recorder = &MockChildWorkflowExecutorFactoryMockRecorder[I, O]{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockActivityExecutor[I, O]) EXPECT() *MockActivityExecutorMockRecorder[I, O] {
+func (m *MockChildWorkflowExecutorFactory[I, O]) EXPECT() *MockChildWorkflowExecutorFactoryMockRecorder[I, O] {
 	return m.recorder
 }
 
-// Execute mocks base method.
-func (m *MockActivityExecutor[I, O]) Execute(ctx workflow.Context, in I) (O, error) {
+// Create mocks base method.
+func (m *MockChildWorkflowExecutorFactory[I, O]) Create(options ...temporal.WorkflowOption) temporal.EventExecutor[I, O] {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Execute", ctx, in)
-	ret0, _ := ret[0].(O)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	varargs := []any{}
+	for _, a := range options {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Create", varargs...)
+	ret0, _ := ret[0].(temporal.EventExecutor[I, O])
+	return ret0
 }
 
-// Execute indicates an expected call of Execute.
-func (mr *MockActivityExecutorMockRecorder[I, O]) Execute(ctx, in any) *gomock.Call {
+// Create indicates an expected call of Create.
+func (mr *MockChildWorkflowExecutorFactoryMockRecorder[I, O]) Create(options ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockActivityExecutor[I, O])(nil).Execute), ctx, in)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockChildWorkflowExecutorFactory[I, O])(nil).Create), options...)
 }

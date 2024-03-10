@@ -38,6 +38,6 @@ func (s *MxResolverTestSuite) TestResolve() {
 
 	sl, err = s.mxResolver.Resolve(s.Ctx, "gmail.com")
 	s.NotEmpty(sl)
-	s.Equal(sl.Get(0).Host, "google.com")
+	s.Equal(sl.Get(0).Host, "gmail-smtp-in.l.google.com")
 	s.Nil(err)
 }

@@ -20,6 +20,10 @@ func NewFxWorkflowExecutorFactory[I any, O any](temporalClient temporal.Client) 
 	return services.NewWorkflowExecutorFactory[I, O](temporalClient)
 }
 
+func NewFxChildWorkflowExecutorFactory[I any, O any]() temporal.ChildWorkflowExecutorFactory[I, O] {
+	return services.NewChildWorkflowExecutorFactory[I, O]()
+}
+
 func NewFxActivityExecutorFactory[I any, O any]() temporal.ActivityExecutorFactory[I, O] {
 	return services.NewActivityExecutorFactory[I, O]()
 }

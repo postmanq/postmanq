@@ -44,7 +44,7 @@ func (s *eventServiceServer) ReceiveEvent(ctx context.Context, event *postmanq.E
 	fmt.Println(event)
 	executor := s.workflowExecutorFactory.Create(
 		temporal.WithWorkflowType(fmt.Sprintf("WorkflowType%s", s.pipeline.Queue)),
-		temporal.WithWorkflowID(fmt.Sprintf("WorkflowType%s_%s_%d", s.pipeline.Queue, event.Uuid, event.AttemptsCount)),
+		temporal.WithWorkflowId(fmt.Sprintf("WorkflowType%s_%s_%d", s.pipeline.Queue, event.Uuid, event.AttemptsCount)),
 		temporal.WithWorkflowExecutionTimeout(time.Minute),
 	)
 

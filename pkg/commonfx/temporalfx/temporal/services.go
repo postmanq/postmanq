@@ -61,13 +61,24 @@ func NewStartWorkflowOptions(options ...WorkflowOption) StartWorkflowOptions {
 		o.Apply(settings)
 	}
 
-	return settings.GetStartWorkflowOptions()
+	return settings.StartWorkflowOptions
+}
+
+func NewChildWorkflowOptions(options ...WorkflowOption) ChildWorkflowOptions {
+	settings := &WorkflowSettings{}
+
+	for _, o := range options {
+		o.Apply(settings)
+	}
+
+	return settings.ChildWorkflowOptions
 }
 
 type withWorkflowType string
 
 func (w withWorkflowType) Apply(o *WorkflowSettings) {
 	o.StartWorkflowOptions.TaskQueue = string(w)
+	o.ChildWorkflowOptions.TaskQueue = string(w)
 	o.ActivityOptions.TaskQueue = string(w)
 }
 
@@ -75,29 +86,16 @@ func WithWorkflowType(workflowType string) WorkflowOption {
 	return withWorkflowType(workflowType)
 }
 
-// set child queue for split merge workflow
+type withWorkflowId string
 
-type withChildQueue string
-
-func (w withChildQueue) Apply(o *WorkflowSettings) {
-	o.ChildWorkflowOptions.TaskQueue = string(w)
-}
-
-func WithChildQueue(queue string) WorkflowOption {
-	return withChildQueue(queue)
-}
-
-// set child queue for split merge workflow
-
-type withWorkflowID string
-
-func (w withWorkflowID) Apply(o *WorkflowSettings) {
+func (w withWorkflowId) Apply(o *WorkflowSettings) {
 	o.StartWorkflowOptions.ID = string(w)
+	o.ChildWorkflowOptions.WorkflowID = string(w)
 }
 
-func WithWorkflowID(workflowType string, args ...interface{}) WorkflowOption {
+func WithWorkflowId(workflowType string, args ...interface{}) WorkflowOption {
 	if len(args) == 0 {
-		return withWorkflowID(workflowType)
+		return withWorkflowId(workflowType)
 	}
 
 	workflowIdParts := make([]string, len(args)+1)
@@ -106,25 +104,14 @@ func WithWorkflowID(workflowType string, args ...interface{}) WorkflowOption {
 		workflowIdParts[i+1] = fmt.Sprint(arg)
 	}
 
-	return withWorkflowID(strings.Join(workflowIdParts, "_"))
-}
-
-// set schedule for cron job activities
-
-type withCronSchedule string
-
-func (w withCronSchedule) Apply(o *WorkflowSettings) {
-	o.StartWorkflowOptions.CronSchedule = string(w)
-}
-
-func WithCronSchedule(queue string) WorkflowOption {
-	return withCronSchedule(queue)
+	return withWorkflowId(strings.Join(workflowIdParts, "_"))
 }
 
 type withWorkflowExecutionTimeout time.Duration
 
 func (w withWorkflowExecutionTimeout) Apply(o *WorkflowSettings) {
 	o.StartWorkflowOptions.WorkflowExecutionTimeout = time.Duration(w)
+	o.ChildWorkflowOptions.WorkflowExecutionTimeout = time.Duration(w)
 }
 
 func WithWorkflowExecutionTimeout(duration time.Duration) WorkflowOption {
@@ -135,6 +122,7 @@ type withWorkflowTaskTimeout time.Duration
 
 func (w withWorkflowTaskTimeout) Apply(o *WorkflowSettings) {
 	o.StartWorkflowOptions.WorkflowTaskTimeout = time.Duration(w)
+	o.ChildWorkflowOptions.WorkflowTaskTimeout = time.Duration(w)
 }
 
 func WithWorkflowTaskTimeout(duration time.Duration) WorkflowOption {
@@ -151,14 +139,14 @@ func WithStartToCloseTimeout(duration time.Duration) WorkflowOption {
 	return withStartToCloseTimeout(duration)
 }
 
-type withActivityID string
+type withActivityId string
 
-func (w withActivityID) Apply(o *WorkflowSettings) {
+func (w withActivityId) Apply(o *WorkflowSettings) {
 	o.ActivityOptions.ActivityID = string(w)
 }
 
 func WithActivityID(activityID string) WorkflowOption {
-	return withActivityID(activityID)
+	return withActivityId(activityID)
 }
 
 type withRetryPolicy temporal.RetryPolicy
@@ -166,6 +154,7 @@ type withRetryPolicy temporal.RetryPolicy
 func (w withRetryPolicy) Apply(o *WorkflowSettings) {
 	policy := temporal.RetryPolicy(w)
 	o.StartWorkflowOptions.RetryPolicy = &policy
+	o.ChildWorkflowOptions.RetryPolicy = &policy
 	o.ActivityOptions.RetryPolicy = &policy
 }
 
@@ -197,6 +186,10 @@ func NewActivityOptions(options ...WorkflowOption) ActivityOptions {
 }
 
 func WithActivityOptions(ctx workflow.Context, opts ActivityOptions) workflow.Context {
+	if ctx == nil {
+		return nil
+	}
+
 	return workflow.WithActivityOptions(ctx, workflow.ActivityOptions(opts))
 }
 
@@ -212,10 +205,14 @@ type WorkflowExecutor[I any, O any] interface {
 	Execute(ctx context.Context, in I) (O, error)
 }
 
-type ActivityExecutorFactory[I any, O any] interface {
-	Create(activityType string) ActivityExecutor[I, O]
+type EventExecutor[I any, O any] interface {
+	Execute(ctx workflow.Context, in I) (O, error)
 }
 
-type ActivityExecutor[I any, O any] interface {
-	Execute(ctx workflow.Context, in I) (O, error)
+type ActivityExecutorFactory[I any, O any] interface {
+	Create(activityType string) EventExecutor[I, O]
+}
+
+type ChildWorkflowExecutorFactory[I any, O any] interface {
+	Create(options ...WorkflowOption) EventExecutor[I, O]
 }

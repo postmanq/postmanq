@@ -27,24 +27,24 @@ func TestEventSenderTestSuite(t *testing.T) {
 
 type EventSenderTestSuite struct {
 	testutils.Suite
-	sender                  postmanq.EventSender
-	workflowExecutorFactory *temporal_mocks.MockWorkflowExecutorFactory[*postmanq.Event, *postmanq.Event]
-	activityExecutorFactory *temporal_mocks.MockActivityExecutorFactory[*postmanq.Event, *postmanq.Event]
-	middlewarePlugin        *postmanq_mocks.MockWorkflowPlugin
-	senderPlugin            *postmanq_mocks.MockWorkflowPlugin
+	sender                       postmanq.EventSender
+	childWorkflowExecutorFactory *temporal_mocks.MockChildWorkflowExecutorFactory[*postmanq.Event, *postmanq.Event]
+	activityExecutorFactory      *temporal_mocks.MockActivityExecutorFactory[*postmanq.Event, *postmanq.Event]
+	middlewarePlugin             *postmanq_mocks.MockWorkflowPlugin
+	senderPlugin                 *postmanq_mocks.MockWorkflowPlugin
 }
 
 func (s *EventSenderTestSuite) SetupSuite() {
 	s.Suite.SetupSuite()
-	s.workflowExecutorFactory = temporal_mocks.NewMockWorkflowExecutorFactory[*postmanq.Event, *postmanq.Event](s.Ctrl)
+	s.childWorkflowExecutorFactory = temporal_mocks.NewMockChildWorkflowExecutorFactory[*postmanq.Event, *postmanq.Event](s.Ctrl)
 	s.activityExecutorFactory = temporal_mocks.NewMockActivityExecutorFactory[*postmanq.Event, *postmanq.Event](s.Ctrl)
 	logger := log_mock.NewMockLogger(s.Ctrl)
 	logger.EXPECT().Error(gomock.Any()).AnyTimes().Return()
 	factory := services.NewFxEventSenderFactory(services.EventSenderFactoryParams{
-		Ctx:                     s.Ctx,
-		Logger:                  logger,
-		WorkflowExecutorFactory: s.workflowExecutorFactory,
-		ActivityExecutorFactory: s.activityExecutorFactory,
+		Ctx:                          s.Ctx,
+		Logger:                       logger,
+		ChildWorkflowExecutorFactory: s.childWorkflowExecutorFactory,
+		ActivityExecutorFactory:      s.activityExecutorFactory,
 	})
 
 	s.middlewarePlugin = postmanq_mocks.NewMockWorkflowPlugin(s.Ctrl)
@@ -59,12 +59,12 @@ func (s *EventSenderTestSuite) SetupSuite() {
 func (s *EventSenderTestSuite) TestSendEvent() {
 	middlewarePlugingType := randomdata.Alphanumeric(32)
 	s.middlewarePlugin.EXPECT().GetType().AnyTimes().Return(middlewarePlugingType)
-	middlewareActivityExecutor := temporal_mocks.NewMockActivityExecutor[*postmanq.Event, *postmanq.Event](s.Ctrl)
+	middlewareActivityExecutor := temporal_mocks.NewMockEventExecutor[*postmanq.Event, *postmanq.Event](s.Ctrl)
 	middlewareActivityExecutor.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(nil, ErrActivity1)
 	s.activityExecutorFactory.EXPECT().Create(middlewarePlugingType).AnyTimes().Return(middlewareActivityExecutor)
-	workflowExecutor := temporal_mocks.NewMockWorkflowExecutor[*postmanq.Event, *postmanq.Event](s.Ctrl)
+	workflowExecutor := temporal_mocks.NewMockEventExecutor[*postmanq.Event, *postmanq.Event](s.Ctrl)
 	workflowExecutor.EXPECT().Execute(gomock.Any(), gomock.Any()).Return(nil, ErrWorkflow)
-	s.workflowExecutorFactory.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes().Return(workflowExecutor)
+	s.childWorkflowExecutorFactory.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes().Return(workflowExecutor)
 	event, err := s.sender.SendEvent(nil, &postmanq.Event{})
 	s.Nil(event)
 	s.NotNil(err)
@@ -83,7 +83,7 @@ func (s *EventSenderTestSuite) TestSendEvent() {
 
 	senderPluginType := randomdata.Alphanumeric(32)
 	s.senderPlugin.EXPECT().GetType().AnyTimes().Return(senderPluginType)
-	senderActivityExecutor := temporal_mocks.NewMockActivityExecutor[*postmanq.Event, *postmanq.Event](s.Ctrl)
+	senderActivityExecutor := temporal_mocks.NewMockEventExecutor[*postmanq.Event, *postmanq.Event](s.Ctrl)
 	s.activityExecutorFactory.EXPECT().Create(senderPluginType).AnyTimes().Return(senderActivityExecutor)
 
 	middlewareActivityExecutor.EXPECT().Execute(gomock.Any(), gomock.Any()).AnyTimes().Return(nil, nil)

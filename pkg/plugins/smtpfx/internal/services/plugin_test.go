@@ -53,6 +53,13 @@ func (s *PluginTestSuite) SetupSuite() {
 
 	logger := log_mock.NewMockLogger(s.Ctrl)
 	logger.EXPECT().Named(gomock.Any()).Return(logger)
+	logger.EXPECT().WithCtx(
+		gomock.Any(),
+		"uuid", gomock.Any(),
+		"from", gomock.Any(),
+		"to", gomock.Any()).Return(logger).AnyTimes()
+	logger.EXPECT().Debug(gomock.Any()).Return().AnyTimes()
+	logger.EXPECT().Debugf(gomock.Any(), gomock.Any()).Return().AnyTimes()
 
 	s.resolver = smtp_mocks.NewMockMxResolver(s.Ctrl)
 	s.parser = smtp_mocks.NewMockEmailParser(s.Ctrl)

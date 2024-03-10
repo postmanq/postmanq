@@ -13,7 +13,6 @@ PLUGINS=$(shell ls -d $(PLUGIN_DIR)/*)
 
 GOCMD=go
 GOBUILD=go build
-#GOBUILD=go build -ldflags="-extldflags=-Wl,-ld_classic"
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
 
@@ -24,7 +23,7 @@ deps:
 	$(GOCMD) mod vendor
 
 test:
-	$(GOTEST) -v ./...
+	$(GOTEST) -race -parallel 8 ./...
 
 lint:
 	golangci-lint run --skip-files=module.go
@@ -56,9 +55,3 @@ infra_down:
 
 postmanq_up:
 	docker-compose -p $(DOCKER_PROJECT) -f $(DOCKER_COMPOSE_POSTMANQ) up -d --build --force-recreate
-
-send_event:
-	curl -X POST http://localhost:8181/v1/event \
-       -H 'Content-Type: application/json' \
-       -H 'Accept: application/json' \
-       -d '{"from": "tester-1@pmq.io", "to": "asolomonoff@gmail.com", "data": "RnJvbTogVGVzdCBPbmUgPHRlc3QtMUBwb3N0bWFucS5pbz4KVG86IFRlc3QgVHdvIDxhc29sb21vbm9mZkBnbWFpbC5jb20+ClN1YmplY3Q6IFRlc3QgbWVzc2FnZQpEYXRlOiBGcmksIDAxIEZlYiAyMDI0IDAwOjAwOjAgLTAwMDAgKFBEVCkKTWVzc2FnZS1JRDogPGM1ODYxMjdhLTdmY2MtNDQwMS1iNTM4LTFkYmZlODdiY2VjNEBwb3N0bWFucS5pbz4KCkhlbGxvIHdvcmxkIQo="}'
