@@ -22,8 +22,8 @@ export
 deps:
 	$(GOCMD) mod vendor
 
-test:
-	$(GOTEST) -race -parallel 8 ./...
+test: deps
+	$(GOTEST) -race -parallel 8 -json ./...
 
 lint:
 	golangci-lint run --skip-files=module.go
