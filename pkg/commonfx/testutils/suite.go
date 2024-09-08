@@ -15,6 +15,7 @@ import (
 	"go.temporal.io/sdk/worker"
 	"go.temporal.io/sdk/workflow"
 	"go.uber.org/mock/gomock"
+	"os"
 	"path/filepath"
 	"runtime"
 	"time"
@@ -43,11 +44,15 @@ type Suite struct {
 	suite.Suite
 	Ctx  context.Context
 	Ctrl *gomock.Controller
+	Dir  string
 }
 
 func (s *Suite) SetupSuite() {
 	s.Ctrl = gomock.NewController(s.T())
 	s.Ctx = context.Background()
+	dir, err := os.Getwd()
+	s.Nil(err)
+	s.Dir = dir
 }
 
 func (s *Suite) TearDownSuite() {

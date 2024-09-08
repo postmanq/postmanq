@@ -183,7 +183,7 @@ createClient:
 
 	logger.Debug("MAIL sent successfully")
 	logger.Debug("try to sign data")
-	data, err = p.dkimSigner.Sign(ctx, event.Data)
+	data, err = p.dkimSigner.Sign(ctx, []byte(event.Data))
 	if err != nil {
 		logger.Error(err)
 		return nil, err

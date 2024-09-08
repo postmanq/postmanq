@@ -1,0 +1,10 @@
+{{ title }}
+
+{{ user.name }}
+{% for purchase in user.purchases %}
+{{ purchase.name }}
+{{ purchase.price }}
+{% endfor %}
+{% if is_true %}
+successful message
+{% endif %}
